@@ -1,0 +1,23 @@
+.skeleton {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    animation: shimmer 1.6s infinite ease-in-out;
+    display: inline-block;
+  }
+  
+  .skeleton-circle {
+    border-radius: 50%;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-color: #f6f6f6;
+    }
+    50% {
+      background-color: #e0e0e0;
+    }
+    100% {
+      background-color: #f6f6f6;
+    }
+  }
+  

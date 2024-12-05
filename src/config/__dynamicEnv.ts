@@ -1,8 +1,9 @@
 type EnvironmentType = "production" | "staging";
-const environment: EnvironmentType = process.env.REACT_APP_ENVIRONMENT as EnvironmentType;
+const environment: EnvironmentType = process.env
+  .REACT_APP_ENVIRONMENT as EnvironmentType;
 
-console.log("Environment:", process.env.REACT_APP_ENVIRONMENT);
-console.log("Secret Key:", process.env.REACT_APP_SECRET_KEY);
+// console.log("Environment:", process.env.REACT_APP_ENVIRONMENT);
+// console.log("Secret Key:", process.env.REACT_APP_SECRET_KEY);
 // Define a mapping object for base URLs
 const baseApiUrls: Record<EnvironmentType, string> = {
   production: process.env.REACT_APP_PRODUCTION_BaseApi_URL || "",
@@ -27,5 +28,3 @@ export const env = {
   environment,
   AES,
 };
-
-

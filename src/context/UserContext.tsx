@@ -8,7 +8,10 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [roles, setRoles] = useState<string[] | null>(null);
+  const [roles, setRoles] = useState<string[] | null>(() => {
+    const storedRoles = localStorage.getItem("roles");
+    return storedRoles ? JSON.parse(storedRoles) : null;
+  });
 
   const setUserRoles = (rolesString: string) => {
     const parsedRoles = rolesString.split(","); // Split the roles string into an array
@@ -22,6 +25,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </UserContext.Provider>
   );
 };
+
 
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);

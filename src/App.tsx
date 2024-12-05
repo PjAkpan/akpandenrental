@@ -23,8 +23,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
-  const { roles } = useUser(); // Use userRole from the context
-
+  const { roles, setUserRoles} = useUser(); // Use userRole from the context
+   // Set user role in context
+  //  const rolesss ="customer, guest, admin"
+  //  setUserRoles(rolesss);
   // Debugging: Log roles and rolesRequired
   console.log("User roles:", roles);
   console.log("Required roles for this route:", rolesRequired);
@@ -33,13 +35,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
     // Loading state when roles are not fetched yet
     return <div>Loading...</div>;
   }
+  
+  const userRolesSet = new Set(roles.map(role => role.trim().toLowerCase()));
+  const requiredRolesSet = new Set(rolesRequired.map(role => role.trim().toLowerCase()));
 
-  const hasAccess = rolesRequired.some((role) => roles.includes(role));
+  // Convert Set to Array for iteration
+  const hasAccess = Array.from(requiredRolesSet).some(requiredRole =>
+    userRolesSet.has(requiredRole)
+  );
+  console.log("Access granted:", hasAccess);
 
-   if (!hasAccess) {
+  if (!hasAccess) {
     // Redirect unauthorized users
     console.warn("Access denied. Redirecting...");
-    return <Navigate to="/login" replace />;
+   return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;
@@ -68,12 +77,12 @@ function App() {
         <Route path="/*" element={<PublicRoutes />} />
 
         {/* User Routes */}
-        <Route path="/user/*" element={<ProtectedRoute rolesRequired={["user"]} />}>
+        <Route path="/user/*" element={<ProtectedRoute rolesRequired={["customer"]} />}>
           <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Admin Routes */}
-        <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["admin"]} />}>
+        <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["user"]} />}>
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="request-status" element={<RequestStatus />} />
         </Route>

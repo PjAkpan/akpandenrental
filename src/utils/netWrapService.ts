@@ -6,7 +6,7 @@ import { FetcherConfig } from "../types";
 const serializeQueryParams = (params: { [key: string]: any }): string => {
   return Object.keys(params)
     .map(
-      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`,
+      (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
     )
     .join("&");
 };
@@ -27,16 +27,16 @@ const createFetcher = ({
       // Replace params in the URL string
       if (Object.keys(params).length > 0) {
         Object.keys(params).forEach((key) => {
-          logger(`Key: ${key}, Value: ${params[key]}`);
-          logger(`Before replace: ${fullUrl}`);
+          // logger(`Key: ${key}, Value: ${params[key]}`);
+          //  logger(`Before replace: ${fullUrl}`);
           // Replace :id with the corresponding value
           fullUrl = fullUrl.replace(
             `:${key}`,
-            encodeURIComponent(params[key] as string | number | boolean),
+            encodeURIComponent(params[key] as string | number | boolean)
           );
 
           // fullUrl = fullUrl.replace(`:${key}`, encodeURIComponent(params[key]));
-          logger(`After replace: ${fullUrl}`);
+          // logger(`After replace: ${fullUrl}`);
         });
       }
 
@@ -56,7 +56,7 @@ const createFetcher = ({
       if (method.toLowerCase() !== "get" && method.toLowerCase() !== "delete") {
         config.data = data;
       }
-      logger(config);
+      // logger(config);
       try {
         const response = await axios(config);
         return response.data;

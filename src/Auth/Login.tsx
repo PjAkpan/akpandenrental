@@ -30,7 +30,7 @@ const handleLogin = async (
   try {
     // Call the login API
     const loginResponse = await loginUser(username, password, deviceId);
-    logger(loginResponse);
+   // logger(loginResponse);
 
     // Check for login failure
     if (!loginResponse || loginResponse.status === false) {
@@ -50,8 +50,8 @@ const handleLogin = async (
 
     // Set user role in context
    setUserRoles(role);
-   console.log("Role being set:", role);
-   //console.log("setUserRole function reference:", setUserRole);
+  console.log("Role being set:", role);
+ 
 
   // Navigate to the dashboard page
   navigate("/dashboard");

@@ -1,5 +1,5 @@
-import Maintenance from "./maintenance";
-import RequestStatus from "./RequestStatus";
+import Maintenance from './maintenance';
+import RequestStatus from './RequestStatus';
 
-// Export both components
+
 export { Maintenance, RequestStatus };

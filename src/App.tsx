@@ -82,7 +82,7 @@ function App() {
         </Route>
 
         {/* Admin Routes */}
-        <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["user"]} />}>
+        <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["admin"]} />}>
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="request-status" element={<RequestStatus />} />
         </Route>

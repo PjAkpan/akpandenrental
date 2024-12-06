@@ -48,7 +48,7 @@ const Signup = () => {
     onSuccess: (data) => {
       console.log("Signup successful, data received:", data);
 
-      const { referenceId } = data.payload;
+      const { referenceId, deviceId } = data.payload;
 
       if (referenceId) {
         localStorage.setItem("referenceId", referenceId);
@@ -57,6 +57,12 @@ const Signup = () => {
     } else {
       console.error("referenceId is missing in the response data.");
       alert("Signup successful, but reference ID is missing.");
+    }
+    if (deviceId) {
+      localStorage.setItem("deviceId", deviceId);
+      console.log("Device ID saved to localStorage:", deviceId);
+    } else {
+      console.error("Device ID is missing in the response data.");
     }
     },
     onError: (err) => {

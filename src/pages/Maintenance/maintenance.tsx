@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiArrowLeft, FiHome } from "react-icons/fi";
 
+
 const Maintenance = () => {
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +44,7 @@ const Maintenance = () => {
   };
 
   // Function to view request status
-  const viewRequestStatus = () => navigate('/request-status'); 
+  const viewRequestStatus = () => navigate('/admin/request-status'); 
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 flex flex-col items-center">

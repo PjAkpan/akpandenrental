@@ -1,22 +1,41 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import React, { useState, useEffect, ChangeEvent, ReactNode } from "react";
 import { FiSearch, FiPaperclip, FiSend, FiCamera } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { initializeWebSocket, closeWebSocket } from "../../utils/websocket";
 
-const RequestStatus = () => {
-  const [userImage, setUserImage] = useState("https://via.placeholder.com/80");
-  const [showModal, setShowModal] = useState(false);
-  const [userName, setUserName] = useState("John Doe");
-  const [chatData, setChatData] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [typedMessage, setTypedMessage] = useState("");
-  const [attachedFile, setAttachedFile] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [page, setPage] = useState(0);
+interface Chat {
+  user: any;
+  text: ReactNode;
+  sent: any;
+  id: number;
+  name: string;
+  message: string;
+  lastActive: string;
+  image: string;
+}
+
+interface Message {
+  text: string;
+  file: string | null;
+  timestamp: string;
+}
+
+const RequestStatus: React.FC = () => {
+  const [userImage, setUserImage] = useState<string>(
+    "https://via.placeholder.com/80"
+  );
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("John Doe");
+  const [chatData, setChatData] = useState<Chat[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [typedMessage, setTypedMessage] = useState<string>("");
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
   const navigate = useNavigate();
 
   const avatarImages = {
@@ -36,59 +55,54 @@ const RequestStatus = () => {
     navigate("/maintenance");
   };
 
-  const handleTyping = () => {
-    setIsTyping(true);
-  };
+  // const handleTyping = () => setIsTyping(true);
+  // const handleStopTyping = () => setIsTyping(false);
 
-  const handleStopTyping = () => {
-    setIsTyping(false);
-  };
+  // Function to load more messages
+  const loadMoreMessages = async () => {
+    console.log("Loading more messages...");
 
-    // Function to load more messages
-    const loadMoreMessages = async () => {
-      console.log('Loading more messages...');
-      
-      try {
-        const newMessages = await fetch(`https://api.example.com/messages?page=${page}`)
-          .then((response) => response.json())
-          .then((data) => data.messages);
-    
-        setChatData((prevChatData) => [...newMessages, ...prevChatData]);
-    
-        // Update page for the next fetch
-        setPage((prevPage) => prevPage + 1);
-    
-        console.log('Messages loaded successfully:', newMessages.length);
-      } catch (error) {
-        console.error('Error loading more messages:', error);
-      }
-    };
+    try {
+      const newMessages = await fetch(
+        `https://api.example.com/messages?page=${page}`
+      )
+        .then((response) => response.json())
+        .then((data) => data.messages);
+
+      setChatData((prevChatData) => [...newMessages, ...prevChatData]);
+
+      // Update page for the next fetch
+      setPage((prevPage) => prevPage + 1);
+
+      console.log("Messages loaded successfully:", newMessages.length);
+    } catch (error) {
+      console.error("Error loading more messages:", error);
+    }
+  };
   // Handle image upload
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5000000) {
-        // Max size 5MB
         alert("File is too large");
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUserImage(reader.result);
+        setUserImage(reader.result as string);
         setShowModal(false);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Handle selecting an avatar
-  const handleAvatarSelection = (avatarUrl) => {
+  const handleAvatarSelection = (avatarUrl: string) => {
     setUserImage(avatarUrl);
     setShowModal(false);
   };
 
-  const handleChatSelection = (chatId) => {
-    const selected = chatData.find((chat) => chat.id === chatId);
+  const handleChatSelection = (chatId: number) => {
+    const selected = chatData.find((chat) => chat.id === chatId) || null;
     setSelectedChat(selected);
   };
 
@@ -97,8 +111,7 @@ const RequestStatus = () => {
     localStorage.removeItem("userDetails");
     navigate("/login");
   };
-
-  const handleFileUpload = (file) => {
+  const handleFileUpload = (file: File) => {
     if (file) {
       setAttachedFile(file);
       alert(`File "${file.name}" has been attached.`);
@@ -107,7 +120,7 @@ const RequestStatus = () => {
 
   // WebSocket connection for live updates
   useEffect(() => {
-    const onNewMessage = (newMessage) => {
+    const onNewMessage = (newMessage: Message) => {
       setMessages((prev) => [...prev, newMessage]);
     };
 
@@ -125,7 +138,7 @@ const RequestStatus = () => {
       return;
     }
 
-    const message = {
+    const message: Message = {
       text: typedMessage,
       file: attachedFile ? attachedFile.name : null,
       timestamp: new Date().toLocaleString(),
@@ -172,14 +185,13 @@ const RequestStatus = () => {
     },
   ];
 
-  const formatMessage = (message) => {
-    return message.split("\n").map((line, index) => (
+  const formatMessage = (message: string) =>
+    message.split("\n").map((line, index) => (
       <span key={index}>
         {line}
         <br />
       </span>
     ));
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -187,11 +199,11 @@ const RequestStatus = () => {
       try {
         const response = await fetch("/api/chatData");
         if (!response.ok) throw new Error("Failed to fetch chat data");
-        const data = await response.json();
-        setChatData(data.length ? data : testChatData);
+        const data: Chat[] = await response.json();
+        setChatData(data.length ? data : []);
       } catch (error) {
         console.error("Error fetching chat data:", error);
-        setChatData(testChatData);
+        setChatData([]);
       } finally {
         setIsLoading(false);
       }
@@ -342,64 +354,79 @@ const RequestStatus = () => {
                   </div>
 
                   <div className="chat-container">
-                  {/* Chat Messages */}
-                  <div className="messages">
-    {chatData.map((message, index) => (
-      <div key={index} className="message">
-        <div className="flex items-center space-x-2">
-          {/* Profile Image with Hover Effect */}
-          <img
-            src={message.user.image}
-            alt={message.user.name}
-            className="w-12 h-12 rounded-full object-cover transition-transform duration-200 transform hover:scale-110"
-          />
-          <div className="message-content">
-            <p>{message.text}</p>
-            {/* Sent Status */}
-            {message.sent ? (
-              <span className="text-xs text-gray-500">Delivered</span>
-            ) : (
-              <span className="text-xs text-gray-500">Sending...</span>
-            )}
-          </div>
-        </div>
-      </div>
-    ))}
-      </div>
+                    {/* Chat Messages */}
+                    <div className="messages">
+                      {chatData.map((message, index) => (
+                        <div key={index} className="message">
+                          <div className="flex items-center space-x-2">
+                            {/* Profile Image with Hover Effect */}
+                            <img
+                              src={message.user.image}
+                              alt={message.user.name}
+                              className="w-12 h-12 rounded-full object-cover transition-transform duration-200 transform hover:scale-110"
+                            />
+                            <div className="message-content">
+                              <p>{message.text}</p>
+                              {/* Sent Status */}
+                              {message.sent ? (
+                                <span className="text-xs text-gray-500">
+                                  Delivered
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  Sending...
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                    {/* Typing Indicator */}
-  {isTyping && (
-    <div className="text-sm text-gray-400 italic">User is typing...</div>
-  )}
+                  {/* Typing Indicator */}
+                  {isTyping && (
+                    <div className="text-sm text-gray-400 italic">
+                      User is typing...
+                    </div>
+                  )}
 
-  {/* Load More Button */}
-  {chatData.length > 10 && (
-    <button
-      onClick={() => loadMoreMessages()}
-      className="text-blue-500 mt-4"
-    >
-      Load More Messages
-    </button>
-  )}
+                  {/* Load More Button */}
+                  {chatData.length > 10 && (
+                    <button
+                      onClick={() => loadMoreMessages()}
+                      className="text-blue-500 mt-4"
+                    >
+                      Load More Messages
+                    </button>
+                  )}
 
                   {/* Chat Input */}
                   <div className="flex items-center mt-4">
                     <button
                       className="text-gray-500 hover:text-gray-700"
-                      onClick={() =>
-                        document.getElementById("fileInput").click()
-                      }
+                      onClick={() => {
+                        const fileInput = document.getElementById("fileInput");
+                        if (fileInput) {
+                          fileInput.click();
+                        }
+                      }}
                     >
                       <FiPaperclip className="text-lg" />
                     </button>
+
                     <input
                       id="fileInput"
                       type="file"
                       className="hidden"
-                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleFileUpload(e.target.files[0]);
+                        }
+                      }}
                       accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
                     />
+
                     <input
                       type="text"
                       placeholder="Type your message"

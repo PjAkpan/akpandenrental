@@ -2,12 +2,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-let deviceId = localStorage.getItem("deviceId");
-if (!deviceId) {
-  deviceId = crypto.randomUUID(); 
-  localStorage.setItem("deviceId", deviceId);
-}
-
 const Home = () => {
   const navigate = useNavigate();
 

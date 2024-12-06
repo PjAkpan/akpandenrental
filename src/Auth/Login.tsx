@@ -20,14 +20,18 @@ const Login = () => {
   const navigate = useNavigate();
   const { setUserRoles } = useUser();
 
-  const deviceId = localStorage.getItem("deviceId") || "unknown-device";
+  const deviceId = localStorage.getItem("deviceId");
 
 const handleLogin = async (
   username: string,
   password: string,
-  deviceId: string
 ) => {
   try {
+    if (!deviceId) {
+      setModalMessage("Device ID is missing. Please sign up again.");
+      setIsModalOpen(true);
+      return;
+    }
     // Call the login API
     const loginResponse = await loginUser(username, password, deviceId);
    // logger(loginResponse);
@@ -41,6 +45,11 @@ const handleLogin = async (
 
     // Store the token in local storage
     localStorage.setItem("token", loginResponse.token);
+
+    if (loginResponse.payload?.deviceId) {
+      localStorage.setItem("deviceId", loginResponse.payload.deviceId);
+    } else {
+    }
 
     // Extract role and validate it
     const role = loginResponse.payload?.access;
@@ -109,13 +118,15 @@ const handleLogin = async (
   const handleLogout = async () => {
     setIsLoading(true);
 
-    // Retrieve userId from localStorage
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      console.error("User ID is missing");
-      setModalMessage("Failed to log out. User ID is missing.");
-      setIsLoading(false);
-      return;
+      // Retrieve userId and deviceId from localStorage
+  const userId = localStorage.getItem("userId");
+  const deviceId = localStorage.getItem("deviceId");
+
+  if (!userId || !deviceId) {
+    console.error("User ID or Device ID is missing");
+    setModalMessage("Failed to log out. User ID or Device ID is missing.");
+    setIsLoading(false);
+    return;
     }
 
     try {
@@ -129,6 +140,7 @@ const handleLogin = async (
         setLogoutSuccess(true);
         setModalMessage("You have successfully logged out from all devices.");
         localStorage.removeItem("userId");
+        localStorage.removeItem("deviceId");
         setTimeout(() => {
           setIsModalOpen(false);
           navigate("/login");
@@ -148,7 +160,7 @@ const handleLogin = async (
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleLogin(username, password, deviceId); // Pass the required arguments here
+    handleLogin(username, password); // Pass the required arguments here
   };
 
   return (

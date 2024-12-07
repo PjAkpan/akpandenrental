@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // services/auth.js
 import { logger } from "netwrap";
 import { costomencryDecryptInternalCRYPTOJS, createFetcher } from "../utils";

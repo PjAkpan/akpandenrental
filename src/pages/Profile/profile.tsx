@@ -41,7 +41,7 @@ const Profile = () => {
 
   const handleSendOtp = async () => {
     try {
-      await axios.post('http://localhost:5000/api/send-otp', { email: contactInfo.email });
+      await axios.post('https://rental-management-backend.onrender.com/api/send-otp', { email: contactInfo.email });
       setIsOtpSent(true);
       alert('OTP has been sent to your email!');
     } catch (error) {
@@ -52,7 +52,7 @@ const Profile = () => {
 
   const handleVerifyOtp = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/verify-otp', { 
+      const response = await axios.post('https://rental-management-backend.onrender.com/api/verify-otp', { 
         email: contactInfo.email, 
         otp, 
         newPhoneNumber 
@@ -77,7 +77,7 @@ const Profile = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/change-password', { 
+      await axios.post('https://rental-management-backend.onrender.com/api/change-password', { 
         oldPassword: password, 
         newPassword 
       });

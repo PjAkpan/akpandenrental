@@ -85,6 +85,8 @@ function App() {
         <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["admin"]} />}>
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="request-status" element={<RequestStatus />} />
+          <Route path="payments" element={<Payment />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Fallback Route */}

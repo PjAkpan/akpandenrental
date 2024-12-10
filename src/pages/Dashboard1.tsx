@@ -36,8 +36,6 @@ const AnalyticsDashboard: React.FC = () => {
       if (storedRole) setRole(storedRole);
     }, [])
 
-    
-
   // Real-time Analytics Update every 5 minutes
   useEffect(() => {
     const timer = setInterval(() => {

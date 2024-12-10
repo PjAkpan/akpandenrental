@@ -1,91 +1,87 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
-import { FiLogOut, FiBell, FiSearch, FiSettings, FiUser, FiMenu } from "react-icons/fi";
+import {
+  FiLogOut,
+  FiBell,
+  FiSearch,
+  FiSettings,
+  FiUser,
+  FiMenu,
+  FiSun,
+  FiMoon,
+} from "react-icons/fi";
 import { AiOutlineHome } from "react-icons/ai";
 import Chart from "react-apexcharts";
-import SkeletonLoader from "../utils/Skeleton/Skeleton";
+import  io  from "socket.io-client"; 
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 type AnalyticsData = {
-  [key: string]: number;
+  totalRooms: number;
+  occupiedRooms: number;
+  totalTenants: number;
+  totalRevenue: number;
+  outstandingPayments: number;
+  maintenanceRequests: number;
 };
 
-const AnalyticsDashboard: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
+const HostelDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [theme, setTheme] = useState("light");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
-    totalRooms: 27,
-    occupiedRooms: 27,
-    totalTenants: 27,
+    totalRooms: 50,
+    occupiedRooms: 45,
+    totalTenants: 48,
     totalRevenue: 150000,
     outstandingPayments: 20000,
     maintenanceRequests: 5,
   });
-  const [notifications, setNotifications] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredAnalytics, setFilteredAnalytics] = useState({});
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState("light");  // Light/Dark Theme Toggle
-  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
-  const [role, setRole] = useState<string | null>(null);   // Role: user or admin
+  const [notifications, setNotifications] = useState<string[]>([
+    "Maintenance request pending",
+    "New tenant added",
+    "Payment of ₦20,000 received",
+    "Rent due for Room 12",
+  ]);
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(
+    notifications.length
+  );
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
-    // Fetch role after login from backend (Simulated)
-    useEffect(() => {
-      const storedRole = localStorage.getItem("role");
-      if (storedRole) setRole(storedRole);
-    }, [])
-
-  // Real-time Analytics Update every 5 minutes
   useEffect(() => {
-    const timer = setInterval(() => {
-      fetchAnalyticsData();
-    }, 300000); // Refresh every 5 minutes
-    return () => clearInterval(timer); // Cleanup timer on component unmount
+    const socket = io("https://rental-management-backend.onrender.com"); 
+    socket.on("notification", (newNotification: string) => {
+      setNotifications((prev) => [newNotification, ...prev]);
+      setUnreadNotifications((prev) => prev + 1);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
-
-  const fetchAnalyticsData = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setAnalytics({
-        totalRooms: 50,
-        occupiedRooms: 45,
-        totalTenants: 48,
-        totalRevenue: 150000,
-        outstandingPayments: 20000,
-        maintenanceRequests: 5,
-      });
-      setNotifications([
-        "Maintenance request pending",
-        "New tenant added",
-        "Payment of ₦20,000 received",
-        "Rent due for Room 12",
-      ]);
-      setIsLoading(false);
-      setUnreadNotifications(notifications.length); // Update unread notifications count
-    }, 2000);
+  // Toggle Theme
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
-  useEffect(() => {
-    // Filter analytics dynamically based on the search query
-    const filtered = Object.entries(analytics).reduce<AnalyticsData>((acc, [key, value]) => {
-      if (key.toLowerCase().includes(searchQuery.toLowerCase())) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
-    setFilteredAnalytics(filtered);
-  }, [searchQuery, analytics]);
-
-  // Handle Notification Mark as Read/Unread
-  const handleNotificationClick = (index: number) => {
-    setNotifications(notifications.map((notif, i) => i === index ? `✔️ ${notif}` : notif));
-    setUnreadNotifications(unreadNotifications - 1); // Decrease unread count
+  const handleNotificationClick = (notification: string) => {
+    setIsNotificationModalOpen(true);
+    setUnreadNotifications((prev) => Math.max(0, prev - 1));
   };
 
-  const handleDeleteNotification = (index: number) => {
-    setNotifications(notifications.filter((_, i) => i !== index));
-    setUnreadNotifications(unreadNotifications - 1); // Decrease unread count
+  const handleLogout = () => {
+    const deviceId = localStorage.getItem("deviceId");
+    localStorage.clear();
+    sessionStorage.clear();
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+      // Restore deviceId
+  if (deviceId) {
+    localStorage.setItem("deviceId", deviceId);
+  }
+    alert("Logged out successfully!");
+    navigate('/login');
+
   };
 
   const revenueChartOptions = {
@@ -107,61 +103,87 @@ const AnalyticsDashboard: React.FC = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} flex flex-col`}>
+    <div
+      className={`min-h-screen flex flex-col ${
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
+      }`}
+    >
       {/* Navbar */}
-      <nav className={`bg-white shadow-md p-4 flex justify-between items-center ${theme === "dark" ? "bg-gray-900 text-white" : ""}`}>
+      <nav
+        className={`shadow-md p-4 flex justify-between items-center ${
+          theme === "dark" ? "bg-gray-800" : "bg-white"
+        }`}
+      >
         <div className="flex items-center space-x-4">
-          <button className="text-gray-700 lg:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            className="text-gray-700 lg:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             <FiMenu size={28} />
           </button>
           <AiOutlineHome size={28} className="text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-800">Analytics Dashboard</h1>
+          <h1 className="text-2xl font-bold">Akpaden Hostel Management</h1>
         </div>
         <div className="hidden lg:flex space-x-6">
-          {role === "admin" && (
-            <>
-              <a href="/admin/maintenance" className="hover:text-blue-500">Maintenance</a>
-              <a href="/admin/payments" className="hover:text-blue-500">Payments</a>
-            </>
-          )}
-          <a href="/profile" className="hover:text-blue-500">My Account</a>
+          <a href="/rooms" className="hover:text-blue-500">
+            Rooms
+          </a>
+          <a href="/admin/tenants" className="hover:text-blue-500">
+            Tenants
+          </a>
+          <a href="/profile" className="hover:text-blue-500">
+            My Account
+          </a>
         </div>
         <div className="flex items-center space-x-4">
+          <button onClick={toggleTheme}>
+            {theme === "dark" ? (
+              <FiSun size={24} className="text-yellow-500" />
+            ) : (
+              <FiMoon size={24} className="text-gray-700" />
+            )}
+          </button>
           <div className="relative">
             <FiSearch size={20} className="absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
-              placeholder="Search analytics..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
               className="pl-10 pr-4 py-2 border rounded-lg bg-gray-100 focus:outline-none"
             />
           </div>
-          <FiBell size={28} className="text-orange-500 cursor-pointer" />
           <div className="relative">
-            <FiUser size={28} className="text-blue-600 cursor-pointer" />
+            <FiBell size={28} className="text-orange-500 cursor-pointer" />
             {unreadNotifications > 0 && (
               <div className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-2 py-1">
                 {unreadNotifications}
               </div>
             )}
           </div>
-          <FiLogOut size={28} className="text-red-500 cursor-pointer" />
+          <FiUser
+            size={28}
+            className="text-blue-600 cursor-pointer"
+            onClick={() => (window.location.href = "/profile")}
+          />
+             <FiLogOut
+            size={28}
+            className="text-red-500 cursor-pointer"
+            onClick={handleLogout}
+          />
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="bg-white shadow-lg p-4 lg:hidden">
-          <ul className="space-y-2">
-            <li className="hover:text-blue-500"><a href="/profile">My Account</a></li>
-            {role === "admin" && (
-              <>
-                <li className="hover:text-blue-500"><a href="/admin/maintenance">Maintenance</a></li>
-                <li className="hover:text-blue-500"><a href="/admin/payments">Payments</a></li>
-              </>
-            )}
-          </ul>
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+        <div className="lg:hidden bg-gray-100 p-4">
+          <a href="/rooms" className="block py-2 hover:text-blue-500">
+            Rooms
+          </a>
+          <a href="/admin/tenants" className="block py-2 hover:text-blue-500">
+            Tenants
+          </a>
+          <a href="/profile" className="block py-2 hover:text-blue-500">
+            My Account
+          </a>
         </div>
       )}
 
@@ -174,58 +196,75 @@ const AnalyticsDashboard: React.FC = () => {
             <p className="text-xl font-bold">{analytics.totalRooms}</p>
           </div>
           <div className="bg-green-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-green-600">Occupied Rooms</h3>
+            <h3 className="text-lg font-semibold text-green-600">
+              Occupied Rooms
+            </h3>
             <p className="text-xl font-bold">{analytics.occupiedRooms}</p>
           </div>
           <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-yellow-600">Outstanding Payments</h3>
+            <h3 className="text-lg font-semibold text-yellow-600">
+              Outstanding Payments
+            </h3>
             <p className="text-xl font-bold">₦{analytics.outstandingPayments}</p>
           </div>
         </div>
+
+           {/* Notifications Modal */}
+      {isNotificationModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg shadow-lg">
+            <h2 className="text-lg font-bold mb-4">Notifications</h2>
+            <ul>
+              {notifications.map((notification, index) => (
+                <li
+                  key={index}
+                  className="mb-2 cursor-pointer hover:text-blue-500"
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  {notification}
+                </li>
+              ))}
+            </ul>
+            <button
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
+              onClick={() => setIsNotificationModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
         {/* Charts Section */}
         <div className="col-span-1 lg:col-span-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-center">Revenue Trend</h3>
-              <Chart options={revenueChartOptions} series={revenueChartData} type="line" height={300} />
+              <h3 className="text-xl font-semibold text-center">
+                Revenue Trend
+              </h3>
+              <Chart
+                options={revenueChartOptions}
+                series={revenueChartData}
+                type="line"
+                height={300}
+              />
             </div>
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-center">Occupancy Rate</h3>
-              <Chart options={occupancyRateChartOptions} series={occupancyRateChartData} type="bar" height={300} />
+              <h3 className="text-xl font-semibold text-center">
+                Occupancy Rate
+              </h3>
+              <Chart
+                options={occupancyRateChartOptions}
+                series={occupancyRateChartData}
+                type="bar"
+                height={300}
+              />
             </div>
           </div>
-        </div>
-
-        {/* Notifications Section */}
-        <div className="col-span-1 lg:col-span-4 bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold">Notifications</h3>
-          <ul className="space-y-2">
-            {notifications.map((notif, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-center"
-                onClick={() => handleNotificationClick(index)}
-              >
-                <span className={`text-gray-700 ${notif.startsWith("✔️") ? "line-through" : ""}`}>
-                  {notif}
-                </span>
-                <button
-                  className="text-red-600 text-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteNotification(index);
-                  }}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </div>
   );
 };
 
-export default AnalyticsDashboard;
+export default HostelDashboard;

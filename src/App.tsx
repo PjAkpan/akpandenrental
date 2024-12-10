@@ -14,6 +14,7 @@ import Payment from "./pages/Payment/payment";
 import Maintenance from "./pages/Maintenance/maintenance";
 import { RequestStatus } from "./pages/Maintenance";
 import AnalyticsDashboard from "./pages/Dashboard";
+import TenantManagement from "./Admin/Tenants";
 
 
 
@@ -85,6 +86,7 @@ function App() {
         <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["admin"]} />}>
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="request-status" element={<RequestStatus />} />
+          <Route path="tenants" element={<TenantManagement />} />
           <Route path="payments" element={<Payment />} />
           <Route path="profile" element={<Profile />} />
         </Route>

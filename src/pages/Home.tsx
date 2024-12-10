@@ -1,9 +1,18 @@
-// src/pages/Home.js
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {  getGeneralDeviceId } from "../utils"; 
 
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storeDeviceId = async () => {
+      const deviceId = await getGeneralDeviceId();
+    console.log("Device ID stored:", deviceId);
+  };
+
+  storeDeviceId();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center bg-gradient-to-r from-gray-100 to-gray-300 px-4 sm:px-6 lg:px-8 py-10">
@@ -13,10 +22,8 @@ const Home = () => {
           Welcome to Ikot Akpaden Hostel Management
         </h1>
         <p className="text-gray-700 mt-4 text-sm sm:text-base lg:text-lg">
-  Experience seamless hostel management in Ikot Akpaden, where convenience, comfort, and reliability come together to redefine modern living.
-</p>
-
-
+          Experience seamless hostel management in Ikot Akpaden, where convenience, comfort, and reliability come together to redefine modern living.
+        </p>
       </div>
 
       {/* Button Section */}

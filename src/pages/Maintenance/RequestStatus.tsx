@@ -194,7 +194,7 @@ const ChatInterface: React.FC = () => {
               </div>
             </div>
             <button
-               onClick={() => navigate("/dashboard")} 
+              onClick={() => navigate("/dashboard")}
               className="bg-white text-blue-600 text-sm px-4 py-2 rounded-lg shadow-md hover:bg-gray-200"
             >
               Back to Dashboard

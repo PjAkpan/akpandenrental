@@ -125,8 +125,8 @@ const HostelDashboard: React.FC = () => {
           <h1 className="text-2xl font-bold">Akpaden Hostel Management</h1>
         </div>
         <div className="hidden lg:flex space-x-6">
-          <a href="/rooms" className="hover:text-blue-500">
-            Rooms
+          <a href="/admin/maintenance" className="hover:text-blue-500">
+            Requests
           </a>
           <a href="/admin/tenants" className="hover:text-blue-500">
             Tenants
@@ -175,8 +175,8 @@ const HostelDashboard: React.FC = () => {
             {/* Mobile Menu */}
             {isMenuOpen && (
         <div className="lg:hidden bg-gray-100 p-4">
-          <a href="/rooms" className="block py-2 hover:text-blue-500">
-            Rooms
+          <a href="/admin/maintenance" className="block py-2 hover:text-blue-500">
+          Requests
           </a>
           <a href="/admin/tenants" className="block py-2 hover:text-blue-500">
             Tenants

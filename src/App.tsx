@@ -18,6 +18,7 @@ import TenantManagement from "./Admin/Tenants";
 import MaintenancePage from "./Admin/Maintenance";
 import AdminChatInterface from "./Admin/AdminChatInterface";
 import AdminPayment from "./Admin/Payments";
+import RoomManagement from "./Admin/Rooms";
 
 
 
@@ -94,6 +95,7 @@ function App() {
         <Route path="chat" element={<AdminChatInterface />} />
         <Route path="tenants" element={<TenantManagement />} />
          <Route path="payment" element={<AdminPayment />} />
+         <Route path="rooms" element={<RoomManagement />} />
           <Route path="profile" element={<Profile />} />
         </Route>
 

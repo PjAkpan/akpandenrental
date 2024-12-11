@@ -131,8 +131,8 @@ const HostelDashboard: React.FC = () => {
           <a href="/admin/tenants" className="hover:text-blue-500">
             Tenants
           </a>
-          <a href="/profile" className="hover:text-blue-500">
-            My Account
+          <a href="/admin/payment" className="hover:text-blue-500">
+            Payments
           </a>
         </div>
         <div className="flex items-center space-x-4">
@@ -181,8 +181,8 @@ const HostelDashboard: React.FC = () => {
           <a href="/admin/tenants" className="block py-2 hover:text-blue-500">
             Tenants
           </a>
-          <a href="/profile" className="block py-2 hover:text-blue-500">
-            My Account
+          <a href="/admin/payment" className="block py-2 hover:text-blue-500">
+            Payments
           </a>
         </div>
       )}

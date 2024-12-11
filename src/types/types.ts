@@ -39,3 +39,13 @@ export interface LoginResponse {
     edited?: boolean;
     isDeleted?: boolean;
   }
+
+  export interface Payment {
+    tenantName: string;
+    amountPaid: number;
+    paymentDate: string;
+    paymentReceipt: string;
+    tenancyReceipt: string;
+    tenantEmail: string;
+    tenantPhone: string;
+  }

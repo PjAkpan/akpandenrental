@@ -12,9 +12,10 @@ import {
 } from "react-icons/fi";
 import { AiOutlineHome } from "react-icons/ai";
 import Chart from "react-apexcharts";
-import  io  from "socket.io-client"; 
-import { useNavigate } from 'react-router-dom';
+import io from "socket.io-client";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import RoomManagement from "../Admin/Rooms";
 
 type AnalyticsData = {
   totalRooms: number;
@@ -49,7 +50,7 @@ const HostelDashboard: React.FC = () => {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   useEffect(() => {
-    const socket = io("https://rental-management-backend.onrender.com"); 
+    const socket = io("https://rental-management-backend.onrender.com");
     socket.on("notification", (newNotification: string) => {
       setNotifications((prev) => [newNotification, ...prev]);
       setUnreadNotifications((prev) => prev + 1);
@@ -73,15 +74,15 @@ const HostelDashboard: React.FC = () => {
     const deviceId = localStorage.getItem("deviceId");
     localStorage.clear();
     sessionStorage.clear();
-    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie =
+      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-      // Restore deviceId
-  if (deviceId) {
-    localStorage.setItem("deviceId", deviceId);
-  }
+    // Restore deviceId
+    if (deviceId) {
+      localStorage.setItem("deviceId", deviceId);
+    }
     alert("Logged out successfully!");
-    navigate('/login');
-
+    navigate("/login");
   };
 
   const revenueChartOptions = {
@@ -98,14 +99,14 @@ const HostelDashboard: React.FC = () => {
     xaxis: { categories: ["Rooms Available", "Rooms Occupied"] },
   };
 
-  const occupancyRateChartData = [
-    { name: "Occupancy", data: [5, 45] },
-  ];
+  const occupancyRateChartData = [{ name: "Occupancy", data: [5, 45] }];
 
   return (
     <div
       className={`min-h-screen flex flex-col ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
+        theme === "dark"
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-gray-800"
       }`}
     >
       {/* Navbar */}
@@ -124,17 +125,35 @@ const HostelDashboard: React.FC = () => {
           <AiOutlineHome size={28} className="text-blue-600" />
           <h1 className="text-2xl font-bold">Akpaden Hostel Management</h1>
         </div>
-        <div className="hidden lg:flex space-x-6">
-          <a href="/admin/maintenance" className="hover:text-blue-500">
-            Requests
-          </a>
-          <a href="/admin/tenants" className="hover:text-blue-500">
-            Tenants
-          </a>
-          <a href="/admin/payment" className="hover:text-blue-500">
-            Payments
-          </a>
-        </div>
+
+        <div className="hidden lg:flex items-center space-x-6">
+  <a
+    href="/admin/rooms"
+    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
+  >
+    Rooms
+  </a>
+  <a
+    href="/admin/maintenance"
+    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
+  >
+    Requests
+  </a>
+  <a
+    href="/admin/tenants"
+    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
+  >
+    Tenants
+  </a>
+  <a
+    href="/admin/payment"
+    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
+  >
+    Payments
+  </a>
+</div>
+
+
         <div className="flex items-center space-x-4">
           <button onClick={toggleTheme}>
             {theme === "dark" ? (
@@ -144,7 +163,10 @@ const HostelDashboard: React.FC = () => {
             )}
           </button>
           <div className="relative">
-            <FiSearch size={20} className="absolute left-3 top-3 text-gray-400" />
+            <FiSearch
+              size={20}
+              className="absolute left-3 top-3 text-gray-400"
+            />
             <input
               type="text"
               placeholder="Search..."
@@ -164,7 +186,7 @@ const HostelDashboard: React.FC = () => {
             className="text-blue-600 cursor-pointer"
             onClick={() => (window.location.href = "/profile")}
           />
-             <FiLogOut
+          <FiLogOut
             size={28}
             className="text-red-500 cursor-pointer"
             onClick={handleLogout}
@@ -172,11 +194,17 @@ const HostelDashboard: React.FC = () => {
         </div>
       </nav>
 
-            {/* Mobile Menu */}
-            {isMenuOpen && (
+      {/* Mobile Menu */}
+      {isMenuOpen && (
         <div className="lg:hidden bg-gray-100 p-4">
-          <a href="/admin/maintenance" className="block py-2 hover:text-blue-500">
-          Requests
+          <a href="/admin/rooms" className="block py-2 hover:text-blue-500">
+            Rooms
+          </a>
+          <a
+            href="/admin/maintenance"
+            className="block py-2 hover:text-blue-500"
+          >
+            Requests
           </a>
           <a href="/admin/tenants" className="block py-2 hover:text-blue-500">
             Tenants
@@ -205,35 +233,37 @@ const HostelDashboard: React.FC = () => {
             <h3 className="text-lg font-semibold text-yellow-600">
               Outstanding Payments
             </h3>
-            <p className="text-xl font-bold">₦{analytics.outstandingPayments}</p>
+            <p className="text-xl font-bold">
+              ₦{analytics.outstandingPayments}
+            </p>
           </div>
         </div>
 
-           {/* Notifications Modal */}
-      {isNotificationModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Notifications</h2>
-            <ul>
-              {notifications.map((notification, index) => (
-                <li
-                  key={index}
-                  className="mb-2 cursor-pointer hover:text-blue-500"
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  {notification}
-                </li>
-              ))}
-            </ul>
-            <button
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
-              onClick={() => setIsNotificationModalOpen(false)}
-            >
-              Close
-            </button>
+        {/* Notifications Modal */}
+        {isNotificationModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-4 rounded-lg shadow-lg">
+              <h2 className="text-lg font-bold mb-4">Notifications</h2>
+              <ul>
+                {notifications.map((notification, index) => (
+                  <li
+                    key={index}
+                    className="mb-2 cursor-pointer hover:text-blue-500"
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    {notification}
+                  </li>
+                ))}
+              </ul>
+              <button
+                className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
+                onClick={() => setIsNotificationModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
         {/* Charts Section */}
         <div className="col-span-1 lg:col-span-4">

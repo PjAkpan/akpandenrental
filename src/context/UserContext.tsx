@@ -1,20 +1,20 @@
 import React, { createContext, useContext, useState } from "react";
+import { UserContextType } from "../types";
 
-interface UserContextType {
-  roles: string[] | null; // Roles as an array
-  setUserRoles: (roles: string) => void; // Function to set roles
-}
+
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [roles, setRoles] = useState<string[] | null>(() => {
     const storedRoles = localStorage.getItem("roles");
+    console.log("Stored Roles on Load:", storedRoles); // Debugging roles
     return storedRoles ? JSON.parse(storedRoles) : null;
   });
 
   const setUserRoles = (rolesString: string) => {
     const parsedRoles = rolesString.split(","); // Split the roles string into an array
+    console.log("Setting Roles:", parsedRoles); // Debugging roles
     setRoles(parsedRoles);
     localStorage.setItem("roles", JSON.stringify(parsedRoles)); // Store roles in localStorage
   };

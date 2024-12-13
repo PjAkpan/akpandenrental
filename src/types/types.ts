@@ -6,6 +6,8 @@ export interface LoginResponse {
     message: string;
     status: boolean;
     payload: {
+      UserId: any;
+      userId: any;
       encryptedString: any;
       verificationToken: any;
       deviceId?: string; 
@@ -48,4 +50,32 @@ export interface LoginResponse {
     tenancyReceipt: string;
     tenantEmail: string;
     tenantPhone: string;
+  }
+
+  export type AnalyticsData = {
+    totalRooms: number;
+    occupiedRooms: number;
+    totalTenants: number;
+    totalRevenue: number;
+    outstandingPayments: number;
+    maintenanceRequests: number;
+  };
+
+  export interface ProfileData {
+    profileImage?: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    homeAddress?: string;
+    occupation?: string;
+    roomNumber?: string | null;
+  }
+
+  export interface UserContextType {
+    roles: string[] | null; 
+    setUserRoles: (roles: string) => void; 
+  }
+
+  export interface ProtectedRouteProps {
+    rolesRequired: string[];
   }

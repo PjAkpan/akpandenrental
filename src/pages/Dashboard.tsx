@@ -47,10 +47,10 @@ const HostelDashboard: React.FC = () => {
     if (!userId) {
       console.error("User ID not found in localStorage");
       // navigate("/login");
-      return; 
+      return;
     }
 
-  console.log("User ID from localStorage:", userId);
+    console.log("User ID from localStorage:", userId);
     axios
       .get(
         `https://rental-management-backend.onrender.com/api/users/profile/${userId}`
@@ -230,38 +230,51 @@ const HostelDashboard: React.FC = () => {
             </h2>
           </div>
           <div className="bg-blue-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-blue-600">Total Rooms</h3>
+            <h3 className="text-lg font-semibold text-teal-600">Total Rooms</h3>
             <p className="text-xl font-bold">{analytics.totalRooms}</p>
           </div>
-          <div className="bg-green-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-green-600">
-              Occupied Rooms
-            </h3>
-            <p className="text-xl font-bold">{analytics.occupiedRooms}</p>
-          </div>
+          <div className="bg-teal-100 p-4 rounded-lg shadow-md">
+  <h3 className="text-lg font-semibold text-teal-600">
+    Occupied Rooms
+  </h3>
+  <p className="text-xl font-bold">{analytics.occupiedRooms}</p>
+</div>
 
-          <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-yellow-600">
-              My Maintenance Request
-            </h3>
-            <p
-              className="text-xl font-bold text-green-600 cursor-pointer"
-              onClick={() => navigate("/customer/maintenace")}
-            >
-              Click
-            </p>
-          </div>
-          <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-yellow-600">
-              Payment {userFullName}
-            </h3>
-            <p
-              className="text-xl font-bold text-blue-600 cursor-pointer"
-              onClick={() => navigate("/customer/payment")}
-            >
-              Click here !!!
-            </p>
-          </div>
+<div className="bg-orange-100 p-4 rounded-lg shadow-md">
+  <h3 className="text-lg font-semibold text-orange-600">
+  </h3>
+  <p
+    className="text-xl font-bold text-orange-800 cursor-pointer"
+    onClick={() => navigate("/customer/maintenance")}
+  >
+    Submit a request for your maintenance needs
+  </p>
+</div>
+
+<div className="bg-purple-100 p-4 rounded-lg shadow-md">
+  <h3 className="text-lg font-semibold text-purple-600">
+     {userFullName}
+  </h3>
+  <p
+    className="text-xl font-bold text-purple-800 cursor-pointer"
+    onClick={() => navigate("/customer/payments")}
+  >
+    Access payment options <br />and make transactions
+  </p>
+</div>
+
+<div className="bg-indigo-100 p-4 rounded-lg shadow-md">
+  <h3 className="text-lg font-semibold text-indigo-600">
+   
+  </h3>
+  <p
+    className="text-xl font-bold text-indigo-800 cursor-pointer"
+    onClick={() => navigate("/customer/profile")}
+  >
+    View and update your personal information
+  </p>
+</div>
+
         </div>
 
         {/* Notifications Modal */}

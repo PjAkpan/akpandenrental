@@ -10,25 +10,21 @@ import Logout from "./Auth/Logout";
 import ForgotPassword from "./Auth/ForgotPassword";
 import VerifyOTP from "./Auth/Verify-otp";
 import Profile from "./pages/Profile";
-import Payment from "./pages/Payment/payment";
-import Maintenance from "./pages/Maintenance/maintenance";
-import { RequestStatus } from "./pages/Maintenance";
+import Payment from "./User/Payment/payment";
+import Maintenance from "./User/Maintenance/maintenance";
+import { RequestStatus } from "./User/Maintenance";
 import AnalyticsDashboard from "./pages/Dashboard";
 import TenantManagement from "./Admin/Tenants";
 import MaintenancePage from "./Admin/Maintenance";
 import AdminChatInterface from "./Admin/AdminChatInterface";
 import AdminPayment from "./Admin/Payments";
 import RoomManagement from "./Admin/Rooms";
+import AdminProfilePage from "./Admin/Profile";
+import { ProtectedRouteProps } from "./types";
 
-
-
-// Role-based route guards
-interface ProtectedRouteProps {
-  rolesRequired: string[];
-}
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
-  const { roles, setUserRoles} = useUser(); // Use userRole from the context
+  const { roles} = useUser(); // Use userRole from the context
    // Set user role in context
   //  const rolesss ="customer, guest, admin"
   //  setUserRoles(rolesss);
@@ -45,9 +41,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
   const requiredRolesSet = new Set(rolesRequired.map(role => role.trim().toLowerCase()));
 
   // Convert Set to Array for iteration
-  const hasAccess = Array.from(requiredRolesSet).some(requiredRole =>
-    userRolesSet.has(requiredRole)
-  );
+  const hasAccess = [...requiredRolesSet].some(requiredRole =>
+     userRolesSet.has(requiredRole));
+
   console.log("Access granted:", hasAccess);
 
   if (!hasAccess) {
@@ -58,6 +54,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
 
   return <Outlet />;
 };
+
+
 
 // Route groups for roles
 const PublicRoutes: React.FC = () => (
@@ -82,7 +80,7 @@ function App() {
         <Route path="/*" element={<PublicRoutes />} />
 
         {/* User Routes */}
-        <Route path="/user/*" element={<ProtectedRoute rolesRequired={["customer"]} />}>
+        <Route path="/users/*" element={<ProtectedRoute rolesRequired={["customer"]} />}>
           <Route path="profile" element={<Profile />} />
           <Route path="maintenance" element={<Maintenance />} />
           <Route path="request-status" element={<RequestStatus />} />
@@ -95,8 +93,7 @@ function App() {
         <Route path="chat" element={<AdminChatInterface />} />
         <Route path="tenants" element={<TenantManagement />} />
          <Route path="payment" element={<AdminPayment />} />
-         <Route path="rooms" element={<RoomManagement />} />
-          <Route path="profile" element={<Profile />} />
+         <Route path="profile" element={<AdminProfilePage />} />
         </Route>
 
         {/* Fallback Route */}

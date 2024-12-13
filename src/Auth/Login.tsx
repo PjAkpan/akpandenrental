@@ -19,19 +19,24 @@ const Login = () => {
   let deviceId = localStorage.getItem("deviceId");
 
   const handleLogin = async (username: string, password: string) => {
+    setIsLoading(true);
     try {
       if (!deviceId) {
         setModalMessage("Device ID is missing. Please sign up again.");
         setIsModalOpen(true);
+        setIsLoading(false);
         return;
       }
       // Call the login API
       const loginResponse: LoginResponse = await loginUser(
         username,
         password,
-        deviceId
+        deviceId,
       );
       // logger(loginResponse);
+
+      // Log the entire response for debugging
+      console.log("Login API response:", loginResponse);
 
       // Check if the response indicates a user not found scenario
       if (
@@ -52,9 +57,29 @@ const Login = () => {
 
       // Store the token in local storage
       localStorage.setItem("token", loginResponse.token);
+      console.log(
+        "Token stored in localStorage:",
+        localStorage.getItem("token")
+      );
+
+      // Store the userId in localStorage
+      if (loginResponse.payload?.UserId) {
+        localStorage.setItem("userId", loginResponse.payload.UserId); 
+  console.log(
+    "User ID stored in localStorage:",
+    localStorage.getItem("userId")
+  );
+}
+
+console.log("User ID from response:", loginResponse.payload?.userId);
+
 
       if (loginResponse.payload?.deviceId) {
         localStorage.setItem("deviceId", loginResponse.payload.deviceId);
+        console.log(
+          "Device ID stored in localStorage:",
+          localStorage.getItem("deviceId")
+        );
       }
 
       // Extract role and validate it
@@ -63,12 +88,22 @@ const Login = () => {
         throw new Error("Invalid user role received from server.");
       }
 
+      // Debugging logs for successful login
+      console.log(`User logged in as: ${role}`);
+      console.log("Full login response payload:", loginResponse.payload);
+
       // Set user role in context
       setUserRoles(role);
-      console.log("Role being set:", role);
+      console.log("Role being set in context:", role);
 
       // Navigate to the dashboard page
-      navigate("/dashboard");
+      if (role.includes("admin")) {
+        navigate("/admin/tenants");
+      } else if (role.includes("customer")) {
+        navigate("/users/maintenance");
+      } else {
+        navigate("/dashboard"); // General dashboard
+      }
     } catch (error) {
       setModalMessage(
         error instanceof Error
@@ -78,57 +113,10 @@ const Login = () => {
       setIsModalOpen(true);
     }
   };
-  // const handleLogin = async (username: string, password: string, deviceId: string) => {
-  //   try {
-  //     // Use the imported loginUser function
-  //     const loginResponse = await loginUser(username, password, deviceId);
-  //     logger(loginResponse);
-  //       if(loginResponse.status ===false){
-  //       throw new Error(loginResponse.message);
-
-  //     }
-
-  //     // Store the token in local storage
-  //    localStorage.setItem("token", loginResponse.token);
-  // const role = loginResponse.payload.access;
-  //     // // Ensure role is a valid string and set the user role
-  //     if (typeof role === "string") {
-  //       setUserRole(role); // Store user role in context
-
-  //       // Navigate based on the user role
-  //       if (role.includes("admin")) {
-  //         navigate("/dashboard");
-  //       } else if (role.includes("customer")) {
-  //         navigate("/dashboard");
-  //       } else {
-  //         navigate("/"); // Default redirection
-  //       }
-  //     } else {
-  //       throw new Error("Invalid user role received");
-  //     }
-  //   } catch (error) {
-  //     setModalMessage(
-  //       error instanceof Error
-  //         ? error.message
-  //         : "An unexpected error occurred. Please try again."
-  //     );
-  //     setIsModalOpen(true);
-  //   }
-  // };
 
   const handleLogout = async () => {
     setIsLoading(true);
-
-    // Retrieve userId and deviceId from localStorage
-    // const userId = localStorage.getItem("userId");
     const deviceId = localStorage.getItem("deviceId");
-
-    // if (!userId) {
-    //   console.error("User ID is missing.");
-    //   setModalMessage("Failed to log out. User ID is missing.");
-    //   setIsLoading(false);
-    //   return;
-    // }
 
     if (!deviceId) {
       console.error("Device ID is missing.");
@@ -185,11 +173,10 @@ const Login = () => {
       }
     }, 2000);
   };
-  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleLogin(username, password); // Pass the required arguments here
+    handleLogin(username, password);
   };
 
   return (
@@ -239,9 +226,12 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold mt-4 transition-all hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300"
+            className={`w-full bg-blue-600 text-white py-3 rounded-lg font-semibold mt-4 transition-all ${
+              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
+            disabled={isLoading}
           >
-            Log In
+            {isLoading ? "Logging In..." : "Log In"}
           </button>
         </form>
 
@@ -257,33 +247,35 @@ const Login = () => {
       </div>
 
       {isModalOpen && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Attention</h3>
-      <p className="text-gray-600 mb-6">{modalMessage}</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Attention</h3>
+            <p className="text-gray-600 mb-6">{modalMessage}</p>
 
             {modalMessage === "User not found. Click here to sign up." ? (
-        <button
-        onClick={() => handleTakeAction("signup")}
-        disabled={isLoading}
-        className={`w-full bg-blue-500 text-white py-3 rounded-lg font-semibold transition-all ${
-          isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-        }`}
-      >
-            {isLoading ? "Redirecting..." : "Take Action"}
-      </button>
+              <button
+                onClick={() => handleTakeAction("signup")}
+                disabled={isLoading}
+                className={`w-full bg-blue-500 text-white py-3 rounded-lg font-semibold transition-all ${
+                  isLoading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-blue-600"
+                }`}
+              >
+                {isLoading ? "Redirecting..." : "Take Action"}
+              </button>
             ) : (
               <button
-              onClick={() => handleTakeAction("logout")}
-              disabled={isLoading}
-              className={`w-full bg-red-500 text-white py-3 rounded-lg font-semibold transition-all ${
-                isLoading
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-red-600"
-              }`}
-            >
-              {isLoading ? "Logging Out..." : "Log Out from All Devices"}
-            </button>
+                onClick={() => handleTakeAction("logout")}
+                disabled={isLoading}
+                className={`w-full bg-red-500 text-white py-3 rounded-lg font-semibold transition-all ${
+                  isLoading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-red-600"
+                }`}
+              >
+                {isLoading ? "Logging Out..." : "Log Out from All Devices"}
+              </button>
             )}
           </div>
         </div>

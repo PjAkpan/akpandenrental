@@ -15,25 +15,16 @@ import Chart from "react-apexcharts";
 import io from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import RoomManagement from "../Admin/Rooms";
-
-type AnalyticsData = {
-  totalRooms: number;
-  occupiedRooms: number;
-  totalTenants: number;
-  totalRevenue: number;
-  outstandingPayments: number;
-  maintenanceRequests: number;
-};
+import { AnalyticsData } from "../types";
 
 const HostelDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [theme, setTheme] = useState("light");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
-    totalRooms: 50,
-    occupiedRooms: 45,
-    totalTenants: 48,
+    totalRooms: 27,
+    occupiedRooms: 15,
+    totalTenants: 27,
     totalRevenue: 150000,
     outstandingPayments: 20000,
     maintenanceRequests: 5,
@@ -48,8 +39,34 @@ const HostelDashboard: React.FC = () => {
     notifications.length
   );
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [userFullName, setUserFullName] = useState<string>("");
+  const [userRole, setUserRole] = useState<string>("");
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("User ID not found in localStorage");
+      // navigate("/login");
+      return; 
+    }
+
+  console.log("User ID from localStorage:", userId);
+    axios
+      .get(
+        `https://rental-management-backend.onrender.com/api/users/profile/${userId}`
+      )
+      .then((response) => {
+        console.log("API Response:", response.data);
+        const fullName = response.data.payload?.fullName || "User";
+        const role = response.data.payload?.role || "customer, admin"; // Assuming role is returned in the response
+        setUserFullName(fullName);
+        setUserRole(role);
+      })
+      .catch((error) => {
+        console.error("Error fetching user profile:", error);
+        setUserFullName("User");
+        setUserRole("customer, admin");
+      });
     const socket = io("https://rental-management-backend.onrender.com");
     socket.on("notification", (newNotification: string) => {
       setNotifications((prev) => [newNotification, ...prev]);
@@ -59,7 +76,7 @@ const HostelDashboard: React.FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [navigate]);
   // Toggle Theme
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -99,7 +116,7 @@ const HostelDashboard: React.FC = () => {
     xaxis: { categories: ["Rooms Available", "Rooms Occupied"] },
   };
 
-  const occupancyRateChartData = [{ name: "Occupancy", data: [5, 45] }];
+  const occupancyRateChartData = [{ name: "Occupancy", data: [12, 15] }];
 
   return (
     <div
@@ -127,32 +144,21 @@ const HostelDashboard: React.FC = () => {
         </div>
 
         <div className="hidden lg:flex items-center space-x-6">
-  <a
-    href="/admin/rooms"
-    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-  >
-    Rooms
-  </a>
-  <a
-    href="/admin/maintenance"
-    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-  >
-    Requests
-  </a>
-  <a
-    href="/admin/tenants"
-    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-  >
-    Tenants
-  </a>
-  <a
-    href="/admin/payment"
-    className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-  >
-    Payments
-  </a>
-</div>
-
+          {[
+            { label: "Rooms", href: "/admin/rooms" },
+            { label: "Requests", href: "/admin/maintenance" },
+            { label: "Tenants", href: "/admin/tenants" },
+            { label: "Payments", href: "/admin/payment" },
+          ].map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
 
         <div className="flex items-center space-x-4">
           <button onClick={toggleTheme}>
@@ -184,7 +190,7 @@ const HostelDashboard: React.FC = () => {
           <FiUser
             size={28}
             className="text-blue-600 cursor-pointer"
-            onClick={() => (window.location.href = "/profile")}
+            onClick={() => (window.location.href = "/admin/profile")}
           />
           <FiLogOut
             size={28}
@@ -197,21 +203,20 @@ const HostelDashboard: React.FC = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="lg:hidden bg-gray-100 p-4">
-          <a href="/admin/rooms" className="block py-2 hover:text-blue-500">
-            Rooms
-          </a>
-          <a
-            href="/admin/maintenance"
-            className="block py-2 hover:text-blue-500"
-          >
-            Requests
-          </a>
-          <a href="/admin/tenants" className="block py-2 hover:text-blue-500">
-            Tenants
-          </a>
-          <a href="/admin/payment" className="block py-2 hover:text-blue-500">
-            Payments
-          </a>
+          {[
+            { label: "Rooms", href: "/admin/rooms" },
+            { label: "Requests", href: "/admin/maintenance" },
+            { label: "Tenants", href: "/admin/tenants" },
+            { label: "Payments", href: "/admin/payment" },
+          ].map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="block py-2 hover:text-blue-500"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
       )}
 
@@ -219,6 +224,11 @@ const HostelDashboard: React.FC = () => {
       <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Summary Cards */}
         <div className="col-span-1 lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="col-span-1 lg:col-span-4">
+            <h2 className="text-3xl font-bold mb-4">
+              Welcome, {userFullName}!
+            </h2>
+          </div>
           <div className="bg-blue-100 p-4 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-blue-600">Total Rooms</h3>
             <p className="text-xl font-bold">{analytics.totalRooms}</p>
@@ -229,12 +239,27 @@ const HostelDashboard: React.FC = () => {
             </h3>
             <p className="text-xl font-bold">{analytics.occupiedRooms}</p>
           </div>
+
           <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-yellow-600">
-              Outstanding Payments
+              My Maintenance Request
             </h3>
-            <p className="text-xl font-bold">
-              ₦{analytics.outstandingPayments}
+            <p
+              className="text-xl font-bold text-green-600 cursor-pointer"
+              onClick={() => navigate("/users/maintenace")}
+            >
+              Click
+            </p>
+          </div>
+          <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-yellow-600">
+              Payment {userFullName}
+            </h3>
+            <p
+              className="text-xl font-bold text-blue-600 cursor-pointer"
+              onClick={() => navigate("/users/payment")}
+            >
+              Click here !!!
             </p>
           </div>
         </div>

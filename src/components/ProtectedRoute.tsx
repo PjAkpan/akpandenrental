@@ -1,19 +1,43 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+// import React from "react";
+// import { Navigate, Outlet } from "react-router-dom";
+// import { useUser } from "../context/UserContext";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRoles: string[];
-}
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const role = localStorage.getItem("role"); 
+// const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
+//   const { roles} = useUser();
+//   console.log("User roles:", roles);
+//   console.log("Required roles for this route:", rolesRequired);
 
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/login" />;
-  }
+//   if (!roles) {
+   
+//     return <div>Loading...</div>;
+//   }
+//   const userRolesSet = new Set(roles.map((role: string) => role.trim().toLowerCase()));
+//   const requiredRolesSet = new Set(rolesRequired.map((role: string) => role.trim().toLowerCase()));
 
-  return <>{children}</>;
-};
+//   // Convert Set to Array for iteration
+//   const hasAccess = [...requiredRolesSet].some(requiredRole =>
+//     userRolesSet.has(requiredRole));
 
-export default ProtectedRoute;
+//     console.log("Access granted:", hasAccess);
+
+//     if (!hasAccess) {
+//       // Redirect unauthorized users
+//       console.warn("Access denied. Redirecting...");
+//      return <Navigate to="/login" replace />;
+//     }
+  
+//     return <Outlet />;
+//   };
+
+// export default ProtectedRoute;
+
+
+
+
+  
+
+
+
+
+

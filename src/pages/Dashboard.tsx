@@ -246,7 +246,7 @@ const HostelDashboard: React.FC = () => {
             </h3>
             <p
               className="text-xl font-bold text-green-600 cursor-pointer"
-              onClick={() => navigate("/users/maintenace")}
+              onClick={() => navigate("/customer/maintenace")}
             >
               Click
             </p>
@@ -257,7 +257,7 @@ const HostelDashboard: React.FC = () => {
             </h3>
             <p
               className="text-xl font-bold text-blue-600 cursor-pointer"
-              onClick={() => navigate("/users/payment")}
+              onClick={() => navigate("/customer/payment")}
             >
               Click here !!!
             </p>

@@ -31,7 +31,7 @@ const Login = () => {
       const loginResponse: LoginResponse = await loginUser(
         username,
         password,
-        deviceId,
+        deviceId
       );
       // logger(loginResponse);
 
@@ -64,15 +64,14 @@ const Login = () => {
 
       // Store the userId in localStorage
       if (loginResponse.payload?.UserId) {
-        localStorage.setItem("userId", loginResponse.payload.UserId); 
-  console.log(
-    "User ID stored in localStorage:",
-    localStorage.getItem("userId")
-  );
-}
+        localStorage.setItem("userId", loginResponse.payload.UserId);
+        console.log(
+          "User ID stored in localStorage:",
+          localStorage.getItem("userId")
+        );
+      }
 
-console.log("User ID from response:", loginResponse.payload?.userId);
-
+      console.log("User ID from response:", loginResponse.payload?.userId);
 
       if (loginResponse.payload?.deviceId) {
         localStorage.setItem("deviceId", loginResponse.payload.deviceId);
@@ -83,26 +82,31 @@ console.log("User ID from response:", loginResponse.payload?.userId);
       }
 
       // Extract role and validate it
-      const role = loginResponse.payload?.access;
-      if (!role || typeof role !== "string") {
-        throw new Error("Invalid user role received from server.");
+      const roles = loginResponse.payload?.access?.split(",") || []; // Assuming roles are comma-separated
+      console.log("User roles:", roles);
+      if (!roles.length) {
+        throw new Error("No valid roles assigned to this user.");
       }
 
       // Debugging logs for successful login
-      console.log(`User logged in as: ${role}`);
+      console.log(`User logged in as: ${roles}`);
       console.log("Full login response payload:", loginResponse.payload);
 
-      // Set user role in context
-      setUserRoles(role);
-      console.log("Role being set in context:", role);
+      // Set the first role (either 'customer' or 'admin') in context
+      const userRole = roles[0]; // '0' for customer or '1' for admin
+      setUserRoles(userRole); // Set the role, either '0' or '1'
+      console.log("Role being set in context:", userRole);
 
-      // Navigate to the dashboard page
-      if (role.includes("admin")) {
+      // Navigate based on the user role
+      if (userRole === "0") {
+        // If the role is '0' (customer), navigate to the customer dashboard
+        navigate("/customer/maintenance");
+      } else if (userRole === "1") {
+        // If the role is '1' (admin), navigate to the admin dashboard
         navigate("/admin/tenants");
-      } else if (role.includes("customer")) {
-        navigate("/users/maintenance");
       } else {
-        navigate("/dashboard"); // General dashboard
+        // For any other role, navigate to a default dashboard or throw an error
+        navigate("/dashboard");
       }
     } catch (error) {
       setModalMessage(

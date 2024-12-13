@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext"; // Import UserProvider and custom hook
 
 import Home from "./pages/Home";
@@ -18,14 +24,15 @@ import TenantManagement from "./Admin/Tenants";
 import MaintenancePage from "./Admin/Maintenance";
 import AdminChatInterface from "./Admin/AdminChatInterface";
 import AdminPayment from "./Admin/Payments";
-import RoomManagement from "./Admin/Rooms";
-import AdminProfilePage from "./Admin/Profile";
-import { ProtectedRouteProps } from "./types";
 
+import AdminProfilePage from "./Admin/profile";
+import { ProtectedRouteProps } from "./types";
+import RoomManagement from "./Admin/Rooms";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
-  const { roles} = useUser(); // Use userRole from the context
-   // Set user role in context
+  const { roles } = useUser(); // Use userRole from the context
+  // Set user role in context
   //  const rolesss ="customer, guest, admin"
   //  setUserRoles(rolesss);
   // Debugging: Log roles and rolesRequired
@@ -36,30 +43,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
     // Loading state when roles are not fetched yet
     return <div>Loading...</div>;
   }
-  
-  const userRolesSet = new Set(roles.map(role => role.trim().toLowerCase()));
-  const requiredRolesSet = new Set(rolesRequired.map(role => role.trim().toLowerCase()));
+
+  const userRolesSet = new Set(roles.map((role) => role.trim().toLowerCase()));
+  const requiredRolesSet = new Set(
+    rolesRequired.map((role) => role.trim().toLowerCase())
+  );
 
   // Convert Set to Array for iteration
-  const hasAccess = [...requiredRolesSet].some(requiredRole =>
-     userRolesSet.has(requiredRole));
+  const hasAccess = [...requiredRolesSet].some((requiredRole) =>
+    userRolesSet.has(requiredRole)
+  );
 
   console.log("Access granted:", hasAccess);
 
   if (!hasAccess) {
-    // Redirect unauthorized users
     console.warn("Access denied. Redirecting...");
-   return <Navigate to="/login" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;
 };
 
-
-
 // Route groups for roles
 const PublicRoutes: React.FC = () => (
-  
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/signup" element={<Signup />} />
@@ -70,38 +76,47 @@ const PublicRoutes: React.FC = () => (
   </Routes>
 );
 
-
 function App() {
   return (
-<UserProvider>
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/*" element={<PublicRoutes />} />
+    <UserProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/*" element={<PublicRoutes />} />
 
-        {/* User Routes */}
-        <Route path="/users/*" element={<ProtectedRoute rolesRequired={["customer"]} />}>
-          <Route path="profile" element={<Profile />} />
-          <Route path="maintenance" element={<Maintenance />} />
-          <Route path="request-status" element={<RequestStatus />} />
-          <Route path="payments" element={<Payment />} />
-        </Route>
+          {/* User Routes */}
+          <Route
+            path="/customer/*"
+            element={<ProtectedRoute rolesRequired={["customer"]} />}
+          >
+            <Route path="profile" element={<Profile />} />
+            <Route path="maintenance" element={<Maintenance />} />
+            <Route path="request-status" element={<RequestStatus />} />
+            <Route path="payments" element={<Payment />} />
+          </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin/*" element={<ProtectedRoute rolesRequired={["admin"]} />}>
-        <Route path="maintenance" element={<MaintenancePage />} />
-        <Route path="chat" element={<AdminChatInterface />} />
-        <Route path="tenants" element={<TenantManagement />} />
-         <Route path="payment" element={<AdminPayment />} />
-         <Route path="profile" element={<AdminProfilePage />} />
-        </Route>
+          {/* Admin Routes */}
+          <Route
+            path="/admin/*"
+            element={<ProtectedRoute rolesRequired={["admin"]} />}
+          >
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="chat" element={<AdminChatInterface />} />
+            <Route path="tenants" element={<TenantManagement />} />
+            <Route path="payment" element={<AdminPayment />} />
+            <Route path="rooms" element={<RoomManagement />} />
+            <Route path="profile" element={<AdminProfilePage />} />
+          </Route>
 
-        {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/" />} />
-        <Route path="dashboard" element={<AnalyticsDashboard />} />
-      </Routes>
-    </Router>
-  </UserProvider>
+          {/* Unauthorized Page */}
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="dashboard" element={<AnalyticsDashboard />} />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

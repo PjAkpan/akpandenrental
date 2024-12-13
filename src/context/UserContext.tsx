@@ -12,8 +12,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return storedRoles ? JSON.parse(storedRoles) : null;
   });
 
-  const setUserRoles = (rolesString: string) => {
-    const parsedRoles = rolesString.split(","); // Split the roles string into an array
+  const setUserRoles = (rolesInput: string | string[]) => {
+    let parsedRoles: string[];
+    if (typeof rolesInput === "string") {
+      parsedRoles = rolesInput.split(","); 
+          } else {
+      parsedRoles = rolesInput || []; // Use the array as-is if it's already an array
+    }
     console.log("Setting Roles:", parsedRoles); // Debugging roles
     setRoles(parsedRoles);
     localStorage.setItem("roles", JSON.stringify(parsedRoles)); // Store roles in localStorage

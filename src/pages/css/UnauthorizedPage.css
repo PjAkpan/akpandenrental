@@ -1,0 +1,101 @@
+/* UnauthorizedPage.css */
+.unauthorized-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Orange gradient background */
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .container {
+    text-align: center;
+    z-index: 1;
+  }
+  
+  .error-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    animation: fadeInUp 1s ease-out;
+  }
+  
+  .error-message {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    animation: fadeInUp 1.5s ease-out;
+  }
+  
+  .go-back-btn {
+    padding: 15px 30px;
+    background-color: #fff;
+    color: #ff7e5f;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: fadeInUp 2s ease-out;
+  }
+  
+  .go-back-btn:hover {
+    background-color: #ff7e5f;
+    color: #fff;
+    transform: scale(1.05);
+  }
+  
+  .animation {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: floatUp 2.5s infinite ease-in-out;
+  }
+  
+  .animation-circle {
+    width: 150px;
+    height: 150px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    animation: pulse 1.5s infinite alternate;
+  }
+  
+  /* Floating up animation */
+  @keyframes floatUp {
+    0% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(-20px);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  
+  /* Animation effect */
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Button hover effect */
+  @keyframes buttonHover {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.05);
+    }
+  }
+  

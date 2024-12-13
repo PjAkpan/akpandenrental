@@ -71,8 +71,6 @@ const Login = () => {
         );
       }
 
-      console.log("User ID from response:", loginResponse.payload?.userId);
-
       if (loginResponse.payload?.deviceId) {
         localStorage.setItem("deviceId", loginResponse.payload.deviceId);
         console.log(
@@ -94,6 +92,7 @@ const Login = () => {
 
       // Set the first role (either 'customer' or 'admin') in context
       const userRole = roles[0]; // '0' for customer or '1' for admin
+      console.log("User role is:", userRole);
       setUserRoles(userRole); // Set the role, either '0' or '1'
       console.log("Role being set in context:", userRole);
 

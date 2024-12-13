@@ -15,20 +15,19 @@ import Login from "./Auth/Login";
 import Logout from "./Auth/Logout";
 import ForgotPassword from "./Auth/ForgotPassword";
 import VerifyOTP from "./Auth/Verify-otp";
-import Profile from "./pages/Profile";
-import Payment from "./User/Payment/payment";
-import Maintenance from "./User/Maintenance/maintenance";
-import { RequestStatus } from "./User/Maintenance";
 import AnalyticsDashboard from "./pages/Dashboard";
 import TenantManagement from "./Admin/Tenants";
 import MaintenancePage from "./Admin/Maintenance";
 import AdminChatInterface from "./Admin/AdminChatInterface";
 import AdminPayment from "./Admin/Payments";
-
 import AdminProfilePage from "./Admin/profile";
 import { ProtectedRouteProps } from "./types";
 import RoomManagement from "./Admin/Rooms";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import MaintenanceCustomer from "./Customer/Maintenance";
+import PaymentCustomer from "./Customer/PaymentCustomer";
+import ProfileCustomer from "./Customer/ProfileCustomer";
+import ChatInterface from "./Customer/RequestStatus";
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
   const { roles } = useUser(); // Use userRole from the context
@@ -89,10 +88,10 @@ function App() {
             path="/customer/*"
             element={<ProtectedRoute rolesRequired={["customer"]} />}
           >
-            <Route path="profile" element={<Profile />} />
-            <Route path="maintenance" element={<Maintenance />} />
-            <Route path="request-status" element={<RequestStatus />} />
-            <Route path="payments" element={<Payment />} />
+            <Route path="profile" element={<ProfileCustomer />} />
+            <Route path="maintenance" element={<MaintenanceCustomer />} />
+            <Route path="payments" element={<PaymentCustomer />} />
+            <Route path="request-status" element={<ChatInterface />} />
           </Route>
 
           {/* Admin Routes */}

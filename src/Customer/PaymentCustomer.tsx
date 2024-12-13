@@ -3,14 +3,14 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiLogOut } from 'react-icons/fi';
-import SkeletonLoader from "../../utils/Skeleton/Skeleton";
+import SkeletonLoader from "../utils/Skeleton/Skeleton";
 
 interface PaymentData {
   lastPayment: string;
   amountPaid: number;
 }
 
-const Payment: React.FC = () => {
+const PaymentCustomer: React.FC = () => {
   const navigate = useNavigate();
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
   const [tenancyReceipt, setTenancyReceipt] = useState<File | null>(null);
@@ -226,4 +226,4 @@ const Payment: React.FC = () => {
   );
 };
 
-export default Payment;
+export default PaymentCustomer;

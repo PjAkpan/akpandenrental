@@ -9,6 +9,7 @@ import { LoginResponse } from "../types";
 const Login = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [paymentId, setPaymentId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalMessage, setModalMessage] = useState<string>("");
   const [logoutSuccess, setLogoutSuccess] = useState(false);
@@ -18,7 +19,7 @@ const Login = () => {
 
   let deviceId = localStorage.getItem("deviceId");
 
-  const handleLogin = async (username: string, password: string) => {
+  const handleLogin = async (username: string, password: string, paymentId: string ) => {
     setIsLoading(true);
     try {
       if (!deviceId) {
@@ -27,84 +28,65 @@ const Login = () => {
         setIsLoading(false);
         return;
       }
+      console.log("Initial LocalStorage Contents:", localStorage);
+      console.log("Stored Payment ID:", paymentId);
       // Call the login API
-      const loginResponse: LoginResponse = await loginUser(
-        username,
-        password,
-        deviceId
-      );
-      // logger(loginResponse);
-
-      // Log the entire response for debugging
+      const loginResponse: LoginResponse = await loginUser(username, password, deviceId, paymentId);
       console.log("Login API response:", loginResponse);
-
       // Check if the response indicates a user not found scenario
-      if (
-        loginResponse?.code === 409 ||
-        loginResponse.message === "User not found"
-      ) {
+      if ( loginResponse?.code === 409 || loginResponse.message === "User not found") {
         setModalMessage("User not found. Click here to sign up.");
         setIsModalOpen(true);
+        setIsLoading(false);
         return;
       }
 
       // Check for login failure
       if (!loginResponse || loginResponse.status === false) {
-        throw new Error(
-          loginResponse.message || "Login failed. Please try again."
-        );
+        throw new Error( loginResponse.message || "Login failed. Please try again.");
       }
 
       // Store the token in local storage
       localStorage.setItem("token", loginResponse.token);
-      console.log(
-        "Token stored in localStorage:",
-        localStorage.getItem("token")
-      );
+      console.log("Token stored in localStorage:", localStorage.getItem("token"));
 
       // Store the userId in localStorage
       if (loginResponse.payload?.UserId) {
         localStorage.setItem("userId", loginResponse.payload.UserId);
-        console.log(
-          "User ID stored in localStorage:",
-          localStorage.getItem("userId")
-        );
-      }
+        console.log( "User ID stored in localStorage:",localStorage.getItem("userId"));}
 
       if (loginResponse.payload?.deviceId) {
         localStorage.setItem("deviceId", loginResponse.payload.deviceId);
-        console.log(
-          "Device ID stored in localStorage:",
-          localStorage.getItem("deviceId")
-        );
-      }
+        console.log("Device ID stored in localStorage:", localStorage.getItem("deviceId"));}
+
+   if (loginResponse.payload?.rentPaymentId) {
+      console.log("Storing rent payment ID:", loginResponse.payload.rentPaymentId);
+      localStorage.setItem("id", loginResponse.payload.rentPaymentId);  // Store the rent payment ID
+        }
+
+        console.log("Updated LocalStorage Contents after login:", localStorage);
 
       // Extract role and validate it
       const roles = loginResponse.payload?.access?.split(",") || []; // Assuming roles are comma-separated
       console.log("User roles:", roles);
+     
       if (!roles.length) {
         throw new Error("No valid roles assigned to this user.");
       }
+      setUserRoles(roles[0]);
 
-      // Debugging logs for successful login
-      console.log(`User logged in as: ${roles}`);
-      console.log("Full login response payload:", loginResponse.payload);
+      localStorage.setItem("roles", JSON.stringify(roles)); 
 
-      // Set the first role (either 'customer' or 'admin') in context
-      const userRole = roles[0]; // '0' for customer or '1' for admin
+      const userRole = roles[0];
       console.log("User role is:", userRole);
-      setUserRoles(userRole); // Set the role, either '0' or '1'
-      console.log("Role being set in context:", userRole);
-
-      // Navigate based on the user role
-      if (userRole === "0") {
-        // If the role is '0' (customer), navigate to the customer dashboard
-        navigate("/customer/maintenance");
-      } else if (userRole === "1") {
-        // If the role is '1' (admin), navigate to the admin dashboard
+      if (userRole === "customer") {
+        console.log("Redirecting to /customer/dashboard");
+        navigate("/customer/dashboard");
+      } else if (userRole === "admin") {
+        console.log("Redirecting to /admin/tenants");
         navigate("/admin/tenants");
       } else {
-        // For any other role, navigate to a default dashboard or throw an error
+        console.log("Redirecting to /dashboard");
         navigate("/dashboard");
       }
     } catch (error) {
@@ -120,20 +102,25 @@ const Login = () => {
   const handleLogout = async () => {
     setIsLoading(true);
     const deviceId = localStorage.getItem("deviceId");
+    const userId = localStorage.getItem("userId");
 
-    if (!deviceId) {
+    console.log("Device ID during logout:", deviceId);
+    console.log("User ID during logout:", userId);
+    console.log("LocalStorage Contents before logout:", localStorage);
+
+    if (!deviceId || !userId) {
       console.error("Device ID is missing.");
       setModalMessage("Failed to log out. Device ID is missing.");
       setIsLoading(false);
       return;
     }
 
-    console.log("Attempting logout with:", { deviceId });
+    console.log("Attempting logout with:", { deviceId, userId });
 
     try {
       const response = await axios.post(
         "https://rental-management-backend.onrender.com/api/users/logout",
-        { deviceId },
+        { deviceId, userId }, 
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -141,6 +128,9 @@ const Login = () => {
         setLogoutSuccess(true);
         setModalMessage("You have successfully logged out from all devices.");
         localStorage.removeItem("token");
+        localStorage.removeItem("userId"); 
+        console.log("Token and User ID removed from LocalStorage.");
+        console.log("LocalStorage Contents after logout:", localStorage);
         setTimeout(() => {
           setIsModalOpen(false);
           navigate("/login");
@@ -148,11 +138,9 @@ const Login = () => {
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 404) {
-        // Handle case where user no longer exists in the backend
         console.warn("User no longer exists on the backend.");
         setModalMessage("User account not found. Please sign up again.");
-        localStorage.clear(); // Clear stored data
-        navigate("/signup"); // Redirect to the signup page
+        navigate("/signup"); 
       } else if (err instanceof Error) {
         console.error("Error during logout:", err.message);
       } else {
@@ -179,7 +167,7 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleLogin(username, password);
+    handleLogin(username, password, paymentId || "");
   };
 
   return (

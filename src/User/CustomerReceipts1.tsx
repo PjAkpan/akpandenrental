@@ -7,7 +7,7 @@ import SkeletonLoader from "../utils/Skeleton/Skeleton";
 import { PaymentData } from "../types";
 
 
-const PaymentCustomer: React.FC = () => {
+const CustomerReceipts: React.FC = () => {
   const navigate = useNavigate();
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
   const [tenancyReceipt, setTenancyReceipt] = useState<File | null>(null);
@@ -154,12 +154,13 @@ const PaymentCustomer: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Occupant Payment</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Upload Receipts</h2>
 
           {/* Payment Status */}
+
           <div className="bg-green-50 p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-green-600 mb-4">Payment Status</h3>
-            {isLoading ? (
+            <h3 className="text-lg font-bold text-green-600 mb-4">Upload new/old payment & tenancy receipt here</h3>
+            {/* {isLoading ? (
               <SkeletonLoader />
             ) : paymentData ? (
               <>
@@ -168,7 +169,7 @@ const PaymentCustomer: React.FC = () => {
               </>
             ) : (
               <p className="text-red-600">Error loading payment data</p>
-            )}
+            )} */}
             <input
               type="file"
               accept="image/*"
@@ -200,16 +201,7 @@ const PaymentCustomer: React.FC = () => {
             </button>
           </div>
 
-          {/* Account Details */}
-          <div className="bg-purple-50 p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-purple-600 mb-4">Payment Details</h3>
-            <button
-              onClick={() => setShowAccountDetails(true)}
-              className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
-            >
-              View Account Details
-            </button>
-          </div>
+
 
 
 
@@ -221,4 +213,4 @@ const PaymentCustomer: React.FC = () => {
   );
 };
 
-export default PaymentCustomer;
+export default CustomerReceipts;

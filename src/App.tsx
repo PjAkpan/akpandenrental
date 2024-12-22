@@ -8,7 +8,6 @@ import {
   Outlet,
 } from "react-router-dom";
 import { UserProvider, useUser } from "./context/UserContext"; // Import UserProvider and custom hook
-
 import Home from "./pages/Home";
 import Signup from "./Auth/Signup";
 import Login from "./Auth/Login";
@@ -28,13 +27,13 @@ import MaintenanceCustomer from "./Customer/Maintenance";
 import PaymentCustomer from "./Customer/PaymentCustomer";
 import ProfileCustomer from "./Customer/ProfileCustomer";
 import ChatInterface from "./Customer/RequestStatus";
+import CustomerDashboard from "./Customer/DashboardCustomer";
+import Account from "./Customer/Account";
+import CustomerReceipts from "./Customer/CustomerReceipts";
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
   const { roles } = useUser(); // Use userRole from the context
-  // Set user role in context
-  //  const rolesss ="customer, guest, admin"
-  //  setUserRoles(rolesss);
-  // Debugging: Log roles and rolesRequired
+
   console.log("User roles:", roles);
   console.log("Required roles for this route:", rolesRequired);
 
@@ -91,7 +90,10 @@ function App() {
             <Route path="profile" element={<ProfileCustomer />} />
             <Route path="maintenance" element={<MaintenanceCustomer />} />
             <Route path="payments" element={<PaymentCustomer />} />
-            <Route path="request-status" element={<ChatInterface />} />
+            <Route path="request-status" element={<ChatInterface id={""} />} />
+            <Route path="dashboard" element={<CustomerDashboard />} />
+            <Route path="accounts" element={<Account />} />
+            <Route path="receipts" element={<CustomerReceipts />} />
           </Route>
 
           {/* Admin Routes */}

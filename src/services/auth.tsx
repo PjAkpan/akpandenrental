@@ -11,10 +11,7 @@ const ivBase64 = getAppUrls().iv;
 const apiBseUrl = getAppUrls().url;
 
 export const loginUser = async (
-  email: string,
-  password: string,
-  deviceId: string
-) => {
+email: string, password: string, deviceId: string, paymentId: string | null) => {
   try {
     const url = `${apiBseUrl}users/login`;
     const queryPayload = { email, password, deviceId };
@@ -33,16 +30,6 @@ export const loginUser = async (
     });
 
     const response = await postCustomerUpdate.trigger();
-    //  logger(response);
-
-    // // Send login request to backend
-    // const response = await fetch(`${apiBseUrl}users/login`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ email, password, deviceId }),
-    // });
 
     // Parse the response as JSON
        const data: LoginResponse = response.payload;
@@ -55,9 +42,7 @@ export const loginUser = async (
     if (!data.payload?.encryptedString || !data.payload.verificationToken) {
       throw new Error("Invalid response payload from the server.");
     }
-    // logger(data.payload.encryptedString);
-    // console.log({ keyBase64, ivBase64 });
-    // Decrypt the encryptedString
+ 
     const decryptedPayload = await costomencryDecryptInternalCRYPTOJS(
       "DE",
       data.payload.encryptedString,
@@ -65,8 +50,8 @@ export const loginUser = async (
       ivBase64
     );
 
-    // console.log("Decrypted Payload:", decryptedPayload);
-
+    localStorage.setItem("authToken", data.payload.verificationToken);
+    // localStorage.setItem("userId", decryptedPayload.userId);
     // Return the decrypted payload along with the token
     return {
       ...decryptedPayload,
@@ -85,32 +70,4 @@ export const loginUser = async (
   }
 };
 
-// const { trigger: handleLogin, isLoading, data, error } = useFetcher({
-//     queryFn: async () => {
-//       try {
-//         const response = await axios.post(
-//           "http://127.0.0.1:5000/api/users/login",
-//           {
-//               email: username,
-//         password,
-//         deviceId,
-//           },
-//           {
-//             headers: { "Content-Type": "application/json" },
-//           }
-//         );
-//         return response.data; // Return the response data
-//       } catch (err) {
-//         const errorMessage =
-//           (err as ErrorResponse).response?.data?.message || "Signup failed";
-//         throw new Error(errorMessage);
-//       }
-//     },
-//     onSuccess: () => {
-//       console.log("SignupIn successful");
-//     //  navigate("/dashboard", { });
-//     },
-//     onError: (err) => {
-//       console.error("Error during signup:", (err as Error).message);
-//     },
-//   });
+

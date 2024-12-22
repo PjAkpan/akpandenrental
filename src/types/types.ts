@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 
 // Define the interface for the login response
 export interface LoginResponse {
@@ -6,6 +7,9 @@ export interface LoginResponse {
     message: string;
     status: boolean;
     payload: {
+      rentPaymentId: any;
+      paymentId: any;
+      roles: any;
       UserId: any;
       userId: any;
       encryptedString: any;
@@ -27,9 +31,16 @@ export interface LoginResponse {
   export type MaintenanceRequest = {
     id: number;
     tenantName: string;
+    subject: string; 
+    description: string;
     issue: string;
     status: string;
     createdAt: string;
+    isActive: boolean; 
+  files: {
+    pictureProof?: string; 
+    videoProof?: string; 
+  }[]; 
   };
 
   export interface Message {
@@ -79,3 +90,49 @@ export interface LoginResponse {
   export interface ProtectedRouteProps {
     rolesRequired: string[];
   }
+
+  export interface Message {
+    id: number;
+    sender: string;
+    content: string;
+    timestamp: string;
+    type: "text" | "file";
+    edited?: boolean;
+    isDeleted?: boolean;
+  }
+
+  export interface PaymentData {
+    lastPayment: string;
+    amountPaid: number;
+  }
+
+  export interface ModalProps {
+    message: string;
+    onClose: () => void;
+  }
+  
+  export interface ProtectedRouteProps {
+    rolesRequired: string[];  
+    id?: string; 
+  }
+
+  export type PaymentHistory = {
+    status: ReactNode;
+    paymentDate: string | number | Date;
+    nextRentDueDate: string | number | Date;
+    id: string; 
+    amount: number;
+    date: string;
+   
+  };
+
+  export interface RentDetails {
+    paymentAmount: any;
+    id: string;
+    amount: number;
+    status: string;
+    isActive: string;
+    nextRentDueDate: string;
+  }
+  
+  

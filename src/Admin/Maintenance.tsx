@@ -10,14 +10,44 @@ const socket = io("https://rental-management-backend.onrender.com");
 
 const MaintenancePage: React.FC = () => {
   const navigate = useNavigate();
-  const [requests, setRequests] = useState<MaintenanceRequest[]>([
-    { id: 1, tenantName: "John Doe", issue: "Leaking faucet", status: "Pending", createdAt: "2024-12-09" },
-    { id: 2, tenantName: "Jane Smith", issue: "Broken window", status: "In Progress", createdAt: "2024-12-08" },
-  ]);
+  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [newMessage, setNewMessage] = useState(""); 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const baseURL = "https://rental-management-backend.onrender.com/api";
+  const fetchMaintenanceURL = `${baseURL}/maintenance/fetch/all?size=10&page=1&option=&gSearch=`;
+
+
+  // Fetch maintenance requests
+  useEffect(() => {
+    const fetchMaintenanceRequests = async () => {
+      try {
+        const response = await fetch(fetchMaintenanceURL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to fetch maintenance requests:", response.status);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Fetched maintenance requests:", data);
+
+        // Update requests state with API data
+        setRequests(data.payload.data || []);
+      } catch (error) {
+        console.error("Error fetching maintenance requests:", error);
+      }
+    };
+
+    fetchMaintenanceRequests();
+  }, [fetchMaintenanceURL]);
 
   // Handle WebSocket connection and receiving messages
   useEffect(() => {
@@ -44,7 +74,7 @@ const MaintenancePage: React.FC = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate("/dashboard"); 
+    navigate("/admin/dashboard"); 
   };
 
   const handleChatIconClick = () => {
@@ -76,7 +106,9 @@ const MaintenancePage: React.FC = () => {
         <thead>
           <tr className="bg-gray-200">
             <th className="border border-gray-300 p-2">Tenant Name</th>
-            <th className="border border-gray-300 p-2">Issue</th>
+            <th className="border border-gray-300 p-2">Subject</th>
+            <th className="border border-gray-300 p-2">Description</th>
+            <th className="border border-gray-300 p-2">Files</th>
             <th className="border border-gray-300 p-2">Status</th>
             <th className="border border-gray-300 p-2">Date</th>
             <th className="border border-gray-300 p-2">Actions</th>
@@ -86,7 +118,8 @@ const MaintenancePage: React.FC = () => {
           {requests.map((req) => (
             <tr key={req.id}>
               <td className="border border-gray-300 p-2">{req.tenantName}</td>
-              <td className="border border-gray-300 p-2">{req.issue}</td>
+              <td className="border border-gray-300 p-2">{req.subject}</td>
+              <td className="border border-gray-300 p-2">{req.description}</td>
               <td className="border border-gray-300 p-2">{req.status}</td>
               <td className="border border-gray-300 p-2">{req.createdAt}</td>
               <td className="border border-gray-300 p-2">
@@ -99,6 +132,42 @@ const MaintenancePage: React.FC = () => {
                   <option value="In Progress">In Progress</option>
                   <option value="Resolved">Resolved</option>
                 </select>
+              </td>
+              <td className="border border-gray-300 p-2">
+                {req.isActive ? "Active" : "Closed"}
+              </td>
+              <td className="border border-gray-300 p-2">
+                {new Date(req.createdAt).toLocaleDateString()}
+              </td>
+              <td className="border border-gray-300 p-2">
+                {req.files.length > 0 ? (
+                  req.files.map((file, index) => (
+                    <div key={index} className="flex flex-col gap-2">
+                      {file.pictureProof && (
+                        <a
+                          href={file.pictureProof}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                        >
+                          View Picture
+                        </a>
+                      )}
+                      {file.videoProof && (
+                        <a
+                          href={file.videoProof}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 underline"
+                        >
+                          View Video
+                        </a>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  "No files"
+                )}
               </td>
             </tr>
           ))}

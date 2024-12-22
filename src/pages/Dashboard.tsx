@@ -95,7 +95,8 @@ const HostelDashboard: React.FC = () => {
     setCurrentNotification(null); // Reset the current notification
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+      const userId = localStorage.getItem("userId");
     const deviceId = localStorage.getItem("deviceId");
     localStorage.clear();
     sessionStorage.clear();
@@ -106,9 +107,51 @@ const HostelDashboard: React.FC = () => {
     if (deviceId) {
       localStorage.setItem("deviceId", deviceId);
     }
-    alert("Logged out successfully!");
-    navigate("/login");
-  };
+   try {
+    // Call the logout endpoint
+    const response = await axios.post(
+      "https://rental-management-backend.onrender.com/api/users/logout",
+      { userId },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    if (response.status === 200) {
+      // Successfully logged out
+      alert("Logged out successfully from all devices!");
+
+      // Clear sensitive data from storage
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      // // Restore deviceId if available
+      // if (deviceId) {
+      //   localStorage.setItem("deviceId", deviceId);
+      // }
+
+      // Navigate to the login page
+      navigate("/login");
+    }
+  } catch (err) {
+    // Handle errors
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 404) {
+        console.warn("User no longer exists on the backend.");
+        alert("User account not found. Please sign up again.");
+        navigate("/login");
+      } else {
+        console.error("Error during logout:", err.message);
+        alert("Failed to log out from all devices. Please try again.");
+      }
+    } else if (err instanceof Error) {
+      console.error("Unexpected error during logout:", err.message);
+      alert("An unexpected error occurred. Please try again.");
+    } else {
+      console.error("Unknown error during logout:", err);
+    }
+  }
+};
 
   const revenueChartOptions = {
     chart: { id: "revenue-trend" },

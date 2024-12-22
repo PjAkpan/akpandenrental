@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { loginUser } from "../services/auth";
 import { LoginResponse } from "../types";
+import { getGeneralDeviceId } from "../utils";
 
 const Login = () => {
   const [username, setUsername] = useState<string>("");
@@ -17,10 +18,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { setUserRoles } = useUser();
 
-  let deviceId = localStorage.getItem("deviceId");
+     
+
+
 
   const handleLogin = async (username: string, password: string, paymentId: string ) => {
     setIsLoading(true);
+      let deviceId = localStorage.getItem("deviceId") || await getGeneralDeviceId();
     try {
       if (!deviceId) {
         setModalMessage("Device ID is missing. Please sign up again.");
@@ -32,12 +36,12 @@ const Login = () => {
       console.log("Stored Payment ID:", paymentId);
       // Call the login API
       const loginResponse: LoginResponse = await loginUser(username, password, deviceId, paymentId);
-      console.log("Login API response:", loginResponse);
+    setIsLoading(false);
+       console.log("Login API response:", loginResponse);
       // Check if the response indicates a user not found scenario
       if ( loginResponse?.code === 409 || loginResponse.message === "User not found") {
         setModalMessage("User not found. Click here to sign up.");
         setIsModalOpen(true);
-        setIsLoading(false);
         return;
       }
 
@@ -90,6 +94,8 @@ const Login = () => {
         navigate("/dashboard");
       }
     } catch (error) {
+      console.log(error,"error here come")
+       setIsLoading(false);
       setModalMessage(
         error instanceof Error
           ? error.message
@@ -120,7 +126,7 @@ const Login = () => {
     try {
       const response = await axios.post(
         "https://rental-management-backend.onrender.com/api/users/logout",
-        { deviceId, userId }, 
+        { userId }, 
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -152,18 +158,39 @@ const Login = () => {
     }
   };
 
-  const handleTakeAction = (action: "signup" | "logout") => {
-    setIsLoading(true);
-    setTimeout(() => {
+  const handleTakeAction = async (action: "signup" | "logout") => {
+  setIsLoading(true);
+
+  if (action === "signup") {
+    setIsLoading(false);
+    setIsModalOpen(false);
+    navigate("/signup");
+  } else if (action === "logout") {
+    try {
+      await handleLogout(); // Assuming this is an async function
+       setIsLoading(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
+       setIsLoading(false);
+    } finally {
       setIsLoading(false);
       setIsModalOpen(false);
-      if (action === "signup") {
-        navigate("/signup");
-      } else if (action === "logout") {
-        handleLogout();
-      }
-    }, 2000);
-  };
+    }
+  }
+};
+
+  // const handleTakeAction = (action: "signup" | "logout") => {
+  //   setIsLoading(true);
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //     setIsModalOpen(false);
+  //     if (action === "signup") {
+  //       navigate("/signup");
+  //     } else if (action === "logout") {
+  //       handleLogout();
+  //     }
+  //   }, 2000);
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,7 +282,17 @@ const Login = () => {
               >
                 {isLoading ? "Redirecting..." : "Take Action"}
               </button>
-            ) : (
+            ) : modalMessage === "You are being logged out due to inactivity." ? (
+        <button
+          onClick={() => handleTakeAction("logout")}
+          disabled={isLoading}
+          className={`w-full bg-red-500 text-white py-3 rounded-lg font-semibold transition-all ${
+            isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-red-600"
+          }`}
+        >
+          {isLoading ? "Logging Out..." : "Log Out from All Devices"}
+        </button>
+      )  : modalMessage === "You are already logged in on another device. Please log out from that device first." ?  (
               <button
                 onClick={() => handleTakeAction("logout")}
                 disabled={isLoading}
@@ -267,7 +304,16 @@ const Login = () => {
               >
                 {isLoading ? "Logging Out..." : "Log Out from All Devices"}
               </button>
-            )}
+            ):(
+        <button
+          onClick={() => {
+            setIsModalOpen(false); // Close modal for default case
+          }}
+          className="w-full bg-gray-500 text-white py-3 rounded-lg font-semibold transition-all hover:bg-gray-600"
+        >
+          Close
+        </button>
+      )}
           </div>
         </div>
       )}

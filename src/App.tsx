@@ -31,9 +31,10 @@ import CustomerDashboard from "./Customer/DashboardCustomer";
 import Account from "./Customer/Account";
 import CustomerReceipts from "./Customer/CustomerReceipts";
 
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
   const { roles } = useUser(); // Use userRole from the context
-
+ //const token = localStorage.getItem("token");
   console.log("User roles:", roles);
   console.log("Required roles for this route:", rolesRequired);
 
@@ -54,10 +55,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
 
   console.log("Access granted:", hasAccess);
 
+
   if (!hasAccess) {
     console.warn("Access denied. Redirecting...");
     return <Navigate to="/unauthorized" replace />;
   }
+
+    // if (!token && !isTokenValid(token)) {
+    //   return <Navigate to="/login" replace />;
+    // } 
 
   return <Outlet />;
 };
@@ -75,6 +81,7 @@ const PublicRoutes: React.FC = () => (
 );
 
 function App() {
+  
   return (
     <UserProvider>
       <Router>

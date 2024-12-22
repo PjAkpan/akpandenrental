@@ -11,7 +11,10 @@ import io from "socket.io-client";
 import { useParams, useNavigate } from "react-router-dom";
 import axios, { HttpStatusCode } from "axios";
 import { PaymentHistory, RentDetails } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import { getAppUrls } from "../config";
 
+const apiBseUrl = getAppUrls().url;
 
 const CustomerDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -25,10 +28,10 @@ const CustomerDashboard: React.FC = () => {
   const [userroomNumber, setUserroomNumber] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [id, setId] = useState<string | null>(null);
-  const [rentDetails, setRentDetails] = useState<RentDetails | null>(null);
+ // const [rentDetails, setRentDetails] = useState<RentDetails | null>(null);
   const [paymentHistories, setPaymentHistories] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  //const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -195,6 +198,42 @@ const CustomerDashboard: React.FC = () => {
   //   }
   // }, []);
 
+  const {
+    data: rentDetails,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["fetch-rent-payment-details", id],
+    queryFn: async () => {
+        const USERID = localStorage.getItem("userId");
+         const token = localStorage.getItem("token"); 
+    if (!USERID) {
+      throw new Error("User ID is not available in local storage");
+    }
+     // if (!id) throw new Error("Rent Payment ID is required");
+      const response = await axios.get(
+        `${apiBseUrl}RentPayment/fetch/all?size=10&page=1&option=USERID&gSearch=${USERID}&option=STATUS&gSearch=active`,
+         {
+        headers: {
+          "Authorization": `Bearer ${token}`,  // Add Authorization header
+        }
+      }
+      );
+      return response.data;
+    },
+   // enabled: !!id, // Only fetch if id exists
+    select: (data) => {
+      if (data?.payload) {
+        return data.payload.data[0]; // Transform data if needed
+      }
+      throw new Error("Rent payment details not found.");
+    },
+    // onError: (err:any) => {
+    //   console.error("Fetch Rent Payment Details Error: ", err);
+    // },
+  });
+
   const handleNotificationClick = (notification: string) => {
     setCurrentNotification(notification);
     setIsNotificationModalOpen(true);
@@ -210,10 +249,10 @@ const CustomerDashboard: React.FC = () => {
     setNotifications([]); // Clear all notifications
   };
 
-  const handleLogout = () => {
+ const handleLogout = async () => {
+      const userId = localStorage.getItem("userId");
     const deviceId = localStorage.getItem("deviceId");
-    localStorage.clear();
-    sessionStorage.clear();
+  
     document.cookie =
       "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
@@ -221,25 +260,62 @@ const CustomerDashboard: React.FC = () => {
     if (deviceId) {
       localStorage.setItem("deviceId", deviceId);
     }
-    alert("Logged out successfully!");
-    navigate("/login");
-  };
+   try {
+    // Call the logout endpoint
+    const response = await axios.post(
+      "https://rental-management-backend.onrender.com/api/users/logout",
+      { userId },
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-useEffect(() => {
+    if (response.status === 200) {
+      // Successfully logged out
+      alert("Logged out successfully from all devices!");
 
-  const savedRentDetails = localStorage.getItem("rentPaymentDetails");
-  
-  if (savedRentDetails) {
-    const rentDetails = JSON.parse(savedRentDetails);
-    setRentDetails(rentDetails);
-    setLoading(false); 
-    console.log("Retrieved Rent Payment Details:", rentDetails);
-  } else {
-    setLoading(false);
-    console.log("No rent payment details found in localStorage.");
+      // Clear sensitive data from storage
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie =
+        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      // Navigate to the login page
+      navigate("/login");
+    }
+  } catch (err) {
+    // Handle errors
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 404) {
+        console.warn("User no longer exists on the backend.");
+        alert("User account not found. Please sign up again.");
+        navigate("/login");
+      } else {
+        console.error("Error during logout:", err.message);
+        alert("Failed to log out from all devices. Please try again.");
+      }
+    } else if (err instanceof Error) {
+      console.error("Unexpected error during logout:", err.message);
+      alert("An unexpected error occurred. Please try again.");
+    } else {
+      console.error("Unknown error during logout:", err);
+    }
   }
-}, []);
+};
 
+// useEffect(() => {
+
+//   const savedRentDetails = localStorage.getItem("rentPaymentDetails");
+  
+//   if (savedRentDetails) {
+//     const rentDetails = JSON.parse(savedRentDetails);
+//     setRentDetails(rentDetails);
+//     setLoading(false); 
+//     console.log("Retrieved Rent Payment Details:", rentDetails);
+//   } else {
+//     setLoading(false);
+//     console.log("No rent payment details found in localStorage.");
+//   }
+// }, []);
+console.log(rentDetails)
 
   return (
     <div
@@ -368,10 +444,10 @@ useEffect(() => {
             <h3 className="text-lg font-semibold text-teal-600">
             Rent Payment Details
             </h3>
-            {loading ? (
+            {isLoading ? (
               <div>Loading...</div>
-            ) : error ? (
-              <div className="error-message">{error}</div>
+            ) : isError ? (
+              <div className="error-message">{isError}</div>
             ) : rentDetails ? (
               <div className="rent-details">
                 <p>

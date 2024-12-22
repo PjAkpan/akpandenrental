@@ -33,7 +33,13 @@ email: string, password: string, deviceId: string, paymentId: string | null) => 
 
     // Parse the response as JSON
        const data: LoginResponse = response.payload;
+if (data.payload.deviceId) {
+  localStorage.setItem("deviceId", data.payload.deviceId);
+}
 
+if (data.payload.userId) {
+  localStorage.setItem("userId", data.payload.userId);
+}
     // Check for non-200 response
     if (!response.status || !data.status) {
       throw new Error(data.message || "Login failed");

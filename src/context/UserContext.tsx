@@ -9,7 +9,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [roles, setRoles] = useState<string[] | null>(() => {
     const storedRoles = localStorage.getItem("roles");
     console.log("Stored Roles on Load:", storedRoles); // Debugging roles
-    return storedRoles ? JSON.parse(storedRoles) : null;
+    return storedRoles ? JSON.parse(storedRoles) : [];
   });
 
   const setUserRoles = (rolesInput: string | string[]) => {
@@ -17,7 +17,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof rolesInput === "string") {
       parsedRoles = rolesInput.split(","); 
           } else {
-      parsedRoles = rolesInput || []; // Use the array as-is if it's already an array
+      parsedRoles = rolesInput || []; 
     }
     console.log("Setting Roles:", parsedRoles); // Debugging roles
     setRoles(parsedRoles);

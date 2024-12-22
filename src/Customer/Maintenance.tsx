@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiArrowLeft, FiHome } from "react-icons/fi";
+import { submitMaintenanceRequest } from '../services/maintenanceService';
+import Modal from './modal/MaintenanceModal';
 
 
 const MaintenanceCustomer = () => {
@@ -13,6 +15,9 @@ const MaintenanceCustomer = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [requestStatus, setRequestStatus] = useState("");
+  const [showModal, setShowModal] = useState(false); 
+  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [countdown, setCountdown] = useState(3);
   const navigate = useNavigate();
 
   // Handle file input changes
@@ -28,17 +33,42 @@ const MaintenanceCustomer = () => {
     const formData = new FormData();
     formData.append("subject", subject);
     formData.append("description", description);
+    
     if (pictureProof) formData.append("pictureProof", pictureProof);
     if (videoProof) formData.append("videoProof", videoProof);
 
+      // Retrieve token from localStorage
+  const token = localStorage.getItem("authToken");
+  const userId = localStorage.getItem("userId");
+
+  if (!token || !userId) {
+    setMessage("You must be logged in to submit a maintenance request.");
+    navigate("/login");  
+    return;
+  }
+  const headers = {
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "multipart/form-data",  
+  };
+
     setLoading(true);
     try {
-      await axios.post("/api/maintenance-request", formData);
-      setMessage("Maintenance request submitted successfully!");
-      setLoading(false);
-      navigate('/dashboard'); // Redirect to dashboard on success
-    } catch (error) {
+      await submitMaintenanceRequest(formData, token); 
+      // setMessage("Maintenance request submitted successfully!");
+           // Start countdown before opening modal
+           let countdownTimer = 3;
+           const timer = setInterval(() => {
+             if (countdownTimer > 0) {
+               setCountdown(countdownTimer);
+               countdownTimer--;
+             } else {
+               clearInterval(timer);
+               setShowModal(true); // Show modal after countdown
+             }
+           }, 1000); // 1 second interval
+    } catch {
       setMessage("Failed to submit maintenance request.");
+    } finally {
       setLoading(false);
     }
   };
@@ -54,7 +84,7 @@ const MaintenanceCustomer = () => {
           <FiArrowLeft size={24} />
         </button>
         <h1 className="text-lg font-bold text-gray-800 flex-grow text-center">Maintenance Request</h1>
-        <button onClick={() => navigate('/dashboard')} className="text-gray-600 hover:text-black">
+        <button onClick={() => navigate('/customer/dashboard')} className="text-gray-600 hover:text-black">
           <FiHome size={24} />
         </button>
       </div>
@@ -128,6 +158,13 @@ const MaintenanceCustomer = () => {
           )}
         </div>
       </div>
+      {/* Modal Popup */}
+      {showModal && (
+        <Modal 
+          message={`Your maintenance request has been submitted successfully!`}
+          onClose={() => setShowModal(false)} 
+        />
+      )}
     </div>
   );
 };

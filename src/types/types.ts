@@ -135,4 +135,12 @@ export interface LoginResponse {
     nextRentDueDate: string;
   }
   
+  export type RentPayment = {
+    id: number;
+    userId: string;
+    status: string;
+    isActive: boolean;
+    createdAt: string;
+  };
+  
   

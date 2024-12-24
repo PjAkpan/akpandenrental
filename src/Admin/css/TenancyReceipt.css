@@ -1,0 +1,229 @@
+/* General Container */
+.receipt-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  font-family: "Poppins", Arial, sans-serif;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+/* Header Section */
+.receipt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.logo {
+  width: 70px;
+  height: auto;
+}
+
+.header-details {
+  text-align: right;
+}
+
+.header-details h1 {
+  font-size: 1.8rem;
+  color: #333;
+  margin: 0;
+}
+
+.header-details p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 2px 0;
+}
+
+/* Title */
+.form-title {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #ff5722;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Form Styling */
+.receipt-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+input,
+textarea {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #ff5722;
+}
+
+textarea {
+  resize: none;
+  min-height: 100px;
+}
+
+button.generate-btn {
+  grid-column: span 2;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: #ff5722;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button.generate-btn:hover {
+  background: #e64a19;
+  transform: translateY(-2px);
+}
+
+/* Signatures Section */
+.signature-canvas {
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  width: 100%;
+  height: 120px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: #ffccbc;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 0.5rem;
+}
+
+button:hover {
+  background: #ffab91;
+  transform: translateY(-2px);
+}
+
+/* Receipt Preview */
+.receipt-preview {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.receipt-header-preview {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.receipt-header-preview h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin: 0;
+}
+
+.receipt-details p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0.5rem 0;
+}
+
+.signature-preview {
+  width: 100px;
+  height: auto;
+  margin-top: 0.5rem;
+}
+
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.signature {
+  text-align: center;
+}
+
+/* Signature Canvas */
+.signature-canvas {
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  width: 100%;
+  height: 120px;
+  position: relative;
+  cursor: crosshair; /* Shows a crosshair pointer */
+  overflow: hidden; /* Ensures the pointer stays within the area */
+}
+
+/* Pointer Indicator */
+.signature-pointer {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: orange;
+  border-radius: 50%;
+  pointer-events: none; /* Allows drawing while keeping the pointer visible */
+  transform: translate(-50%, -50%); /* Centers the pointer on the cursor */
+  z-index: 10;
+}
+
+
+/* Error and Success Messages */
+.error-message {
+  color: #d32f2f;
+  font-weight: 600;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.success-message {
+  color: #388e3c;
+  font-weight: 600;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .receipt-form {
+    grid-template-columns: 1fr;
+  }
+
+  .signatures {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .signature {
+    margin-bottom: 1rem;
+  }
+}

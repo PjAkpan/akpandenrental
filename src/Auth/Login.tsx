@@ -33,10 +33,10 @@ const Login = () => {
         return;
       }
       console.log("Initial LocalStorage Contents:", localStorage);
-      console.log("Stored Payment ID:", paymentId);
+
       // Call the login API
       const loginResponse: LoginResponse = await loginUser(username, password, deviceId, paymentId);
-    setIsLoading(false);
+      setIsLoading(false);
        console.log("Login API response:", loginResponse);
       // Check if the response indicates a user not found scenario
       if ( loginResponse?.code === 409 || loginResponse.message === "User not found") {
@@ -178,19 +178,6 @@ const Login = () => {
     }
   }
 };
-
-  // const handleTakeAction = (action: "signup" | "logout") => {
-  //   setIsLoading(true);
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //     setIsModalOpen(false);
-  //     if (action === "signup") {
-  //       navigate("/signup");
-  //     } else if (action === "logout") {
-  //       handleLogout();
-  //     }
-  //   }, 2000);
-  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

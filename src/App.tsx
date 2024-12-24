@@ -30,6 +30,7 @@ import ChatInterface from "./Customer/RequestStatus";
 import CustomerDashboard from "./Customer/DashboardCustomer";
 import Account from "./Customer/Account";
 import CustomerReceipts from "./Customer/CustomerReceipts";
+import TenancyReceipt from "./Admin/TenancyReceipt";
 
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
@@ -114,6 +115,7 @@ function App() {
             <Route path="payment" element={<AdminPayment />} />
             <Route path="rooms" element={<RoomManagement />} />
             <Route path="profile" element={<AdminProfilePage />} />
+            <Route path="tenancy-receipt" element={<TenancyReceipt />} />
           </Route>
 
           {/* Unauthorized Page */}

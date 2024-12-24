@@ -135,4 +135,26 @@ export interface LoginResponse {
     nextRentDueDate: string;
   }
   
+  export type RentPayment = {
+    amount: ReactNode;
+    description: ReactNode;
+    id: number;
+    userId: string;
+    status: string;
+    isActive: boolean;
+    createdAt: string;
+  };
+
+  export interface Filters {
+    [x: string]: any;
+    gSearch: string;
+    option: string;
+    orderBy: string;
+    sort: string;
+    size: number;
+    page: number;
+    startDate: string;
+    endDate: string;
+  }
   
+

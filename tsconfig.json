@@ -21,7 +21,5 @@
     "jsx": "react-jsx",
     "downlevelIteration": true // Added this flag
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src/**/*"]
 }

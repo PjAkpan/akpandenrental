@@ -81,6 +81,13 @@ const CustomerReceipts: React.FC = () => {
       return;
     }
 
+    const token = localStorage.getItem("authToken"); // Retrieve the token
+    if (!token) {
+      setError("Authorization token is missing. Please log in again.");
+      return;
+    }
+  
+
     const formData = new FormData();
     formData.append("paymentDate", paymentDate);
     formData.append("paymentAmount", paymentAmount);
@@ -88,12 +95,18 @@ const CustomerReceipts: React.FC = () => {
     formData.append("roomNumber", userRoomNumber);
     formData.append("userId", userId);
 
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        "https://rental-management-backend.onrender.com/api/RentPayment/add",
-        formData
-      );
+  try {
+    setLoading(true);
+    const response = await axios.post(
+      "https://rental-management-backend.onrender.com/api/RentPayment/add",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+      }
+    );
+
 
       if (response.status === 201 && response.data.code === 201) {
         const rentPaymentDetails = {

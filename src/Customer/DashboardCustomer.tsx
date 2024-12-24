@@ -13,6 +13,7 @@ import axios, { HttpStatusCode } from "axios";
 import { PaymentHistory, RentDetails } from "../types";
 import { useQuery } from "@tanstack/react-query";
 import { getAppUrls } from "../config";
+import RentHistory from "./RentHistory";
 
 const apiBseUrl = getAppUrls().url;
 
@@ -28,10 +29,9 @@ const CustomerDashboard: React.FC = () => {
   const [userroomNumber, setUserroomNumber] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [id, setId] = useState<string | null>(null);
- // const [rentDetails, setRentDetails] = useState<RentDetails | null>(null);
   const [paymentHistories, setPaymentHistories] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  //const [error, setError] = useState<string | null>(null);
+ 
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -77,157 +77,39 @@ const CustomerDashboard: React.FC = () => {
 
 
 
-  // useEffect(() => {
-  //   const paymentId = localStorage.getItem("id");
-  //   console.log("Stored Payment ID:", paymentId);
-
- 
-  //   if (!paymentId) {
-  //     setError("Payment ID is not available.");
-  //     setLoading(false);
-  //     return;
-  //   }
-  //   setId(paymentId);
-  // }, []);
-
-// useEffect(() => {
-//   if (!id) return;
-//     const fetchRentPaymentDetails = async () => {
-//       try {
-//         const response = await axios.get(
-//           `https://rental-management-backend.onrender.com/api/RentPayment/view/${id}`
-//         );
-//         console.log("API Response Data:", response.data);
-//         const { data } = response;
-//         if (data && data.payload) {
-//           setRentDetails(data.payload);
-//         } else {
-//           setError("Rent payment details not found.");
-//         }
-//       } catch (err) {
-//         if (err instanceof Error) {
-//           setError(err.message || "An error occurred.");
-//         } else if (typeof err === "object" && err !== null && "response" in err) {
-//           setError((err as any).response?.data?.message || "An error occurred.");
-//         } else {
-//           setError("An unknown error occurred.");
-//         }
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-  
-
-//     fetchRentPaymentDetails();
-//   }, [id]);
-  
-
-  //     if (response.data && response.data.payload) {
-  //       const data = response.data.payload;
-  //       console.log("Fetched nextRentDueDate:", data.nextRentDueDate);
-
-  //       if (data.nextRentDueDate && !isNaN(new Date(data.nextRentDueDate).getTime())) {
-  //       setNextRentDueDate(data.nextRentDueDate);
-  //            } else {
-  //       setNextRentDueDate("N/A");
-  //       console.warn("Invalid or missing nextRentDueDate:", data.nextRentDueDate);
-  //     }
-  //       setRentStatus(
-  //         data.status ? "Paid" : data.status === false ? "Due" : "Pending"
-  //       );
-  //     } else {
-  //       setError("No rent payment details found.");
-  //       console.warn("No payload in API response:", response.data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching rent payment details:", error);
-  //     setError("Failed to fetch rent payment details.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
- 
-  // useEffect(() => {
-  //   const paymentId = localStorage.getItem("paymentId");
-  //   if (paymentId) {
-  //     console.log("Retrieved Payment ID:", paymentId);
-  //     fetchRentPaymentDetails(paymentId);
-  //   } else {
-  //     console.log("No Payment ID found in localStorage.");
-  //   }
-  // }, []);
-
-  // const fetchPaymentHistories = async (userId: string) => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await axios.get(
-  //       `https://rental-management-backend.onrender.com/api/RentPayment/view/${userId}`);
-  //        console.log("Backend Response:", response.data);
-  //        const { statusCode, message, payload } = response.data;
-
-  //     if (statusCode === 200 && Array.isArray(payload)) {
-  //       const rentPaymentIds = payload.map((payment) => payment.id);
-  //       setPaymentHistories(payload);
-  //       setError("");
-  //     } else if (statusCode === 404) {
-  //       setPaymentHistories([]);
-  //       setError(message || "No rent payment histories found for this user.");
-  //     } else {
-  //       throw new Error(message || "Unexpected response from the server.");
-  //     }
-  //   } catch (err) {
-  //     if (axios.isAxiosError(err)) {
-  //       setError(err.response?.data?.message || "Internal server error occurred. Please try again later.");
-  //     } else {
-  //       setError("An unexpected error occurred.");
-  //     }
-  //     setPaymentHistories([]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const userId = localStorage.getItem("userId"); 
-  //   if (userId) {
-  //     fetchPaymentHistories(userId);
-  //   } else {
-  //     setError("No user ID found. Please log in.");
-  //     setLoading(false);
-  //   }
-  // }, []);
-
-  const {
-    data: rentDetails,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data: rentDetails,isLoading,isError, error,} = useQuery({
     queryKey: ["fetch-rent-payment-details", id],
     queryFn: async () => {
-        const USERID = localStorage.getItem("userId");
-         const token = localStorage.getItem("token"); 
-    if (!USERID) {
-      throw new Error("User ID is not available in local storage");
-    }
-     // if (!id) throw new Error("Rent Payment ID is required");
-      const response = await axios.get(
-        `${apiBseUrl}RentPayment/fetch/all?size=10&page=1&option=USERID&gSearch=${USERID}&option=STATUS&gSearch=active`,
-         {
-        headers: {
-          "Authorization": `Bearer ${token}`,  // Add Authorization header
-        }
+      const USERID = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      // if (!USERID) {
+      //   throw new Error("User ID is not available in local storage");
+      // }
+      if (!USERID) {
+        console.error("User ID is missing. Redirecting to login...");
+        throw new Error("User is not authenticated. Please log in again.");
       }
+      // if (!id) throw new Error("Rent Payment ID is required");
+      const response = await axios.get(
+        `https://rental-management-backend.onrender.com/api/RentPayment/fetch/all?size=10&page=1&option=USERID&gSearch=${USERID}&option=STATUS&gSearch=active`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add Authorization header
+          },
+        }
       );
+          // Log the response payload
+          console.log("API Response for USERID:", USERID, response.data);
       return response.data;
     },
-   // enabled: !!id, // Only fetch if id exists
+    // enabled: !!id, // Only fetch if id exists
     select: (data) => {
-      if (data?.payload) {
-        return data.payload.data[0]; // Transform data if needed
+      if (data?.payload?.data?.length > 0) {
+        return data.payload.data[0];
       }
-      throw new Error("Rent payment details not found.");
+      // throw new Error("Rent payment details not found.");
+      return null; // Handle empty data gracefully
+      
     },
     // onError: (err:any) => {
     //   console.error("Fetch Rent Payment Details Error: ", err);
@@ -301,20 +183,7 @@ const CustomerDashboard: React.FC = () => {
   }
 };
 
-// useEffect(() => {
 
-//   const savedRentDetails = localStorage.getItem("rentPaymentDetails");
-  
-//   if (savedRentDetails) {
-//     const rentDetails = JSON.parse(savedRentDetails);
-//     setRentDetails(rentDetails);
-//     setLoading(false); 
-//     console.log("Retrieved Rent Payment Details:", rentDetails);
-//   } else {
-//     setLoading(false);
-//     console.log("No rent payment details found in localStorage.");
-//   }
-// }, []);
 console.log(rentDetails)
 
   return (
@@ -445,7 +314,7 @@ console.log(rentDetails)
             Rent Payment Details
             </h3>
             {isLoading ? (
-              <div>Loading...</div>
+             <div>Loading rent details...</div>
             ) : isError ? (
               <div className="error-message">{isError}</div>
             ) : rentDetails ? (
@@ -569,130 +438,9 @@ console.log(rentDetails)
                 Rent Payment History
               </h3>
 
-              {/* <div>
-                {error ? (
-                  <div className="error-message">{error}</div>
-                ) : paymentHistories.length > 0 ? (
-                  <div className="rent-history">
-                    <h2>Rent Payment History</h2>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Payment ID</th>
-                          <th>Amount (₦)</th>
-                          <th>Status</th>
-                          <th>Payment Date</th>
-                          <th>Next Rent Due Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paymentHistories.map((payment) => (
-                          <tr key={payment.id}>
-                            <td>{payment.id}</td>
-                            <td>{payment.amount.toLocaleString()}</td>
-                            <td>{payment.status}</td>
-                            <td>
-                              {new Date(
-                                payment.paymentDate
-                              ).toLocaleDateString()}
-                            </td>
-                            <td>
-                              {new Date(
-                                payment.nextRentDueDate
-                              ).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div>No rent payment history found.</div>
-                )}
-              </div> */}
-
-              {/* Filter Section */}
-              {/* <div className="flex justify-between items-center mb-4">
-                <input
-                  type="text"
-                  placeholder="Search payments..."
-                  className="border border-gray-300 rounded-lg px-4 py-2 w-1/3"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <select
-                  className="border border-gray-300 rounded-lg px-4 py-2"
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option value="">Filter by Status</option>
-                  <option value="success">Success</option>
-                  <option value="pending">Pending</option>
-                  <option value="failed">Failed</option>
-                </select>
-                <input
-                  type="date"
-                  className="border border-gray-300 rounded-lg px-4 py-2"
-                  onChange={(e) => setDateFilter(e.target.value)}
-                />
-              </div> */}
-
-              {/* Payment History Table */}
-              {/* <div className="overflow-x-auto"> */}
-              {/* <table className="table-auto w-full border-collapse border border-gray-200">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Date
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Description
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Amount
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPayments.length > 0 ? (
-                      filteredPayments.map((payment, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="border border-gray-200 px-4 py-2">
-                            {payment.date}
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2">
-                            {payment.description}
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2">
-                            {payment.amount}
-                          </td>
-                          <td
-                            className={`border border-gray-200 px-4 py-2 ${
-                              payment.status === "success"
-                                ? "text-green-500"
-                                : payment.status === "pending"
-                                ? "text-yellow-500"
-                                : "text-red-500"
-                            }`}
-                          >
-                            {payment.status}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className="border border-gray-200 px-4 py-2 text-center text-gray-500"
-                        >
-                          No payment history found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div> */}
+              <RentHistory />
+           
+           
             </div>
           </div>
         </div>

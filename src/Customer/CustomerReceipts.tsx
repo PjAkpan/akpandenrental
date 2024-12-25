@@ -253,31 +253,26 @@ const CustomerReceipts: React.FC = () => {
       </div>
       {/* Success Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg max-w-md">
-            <h2 className="text-xl font-semibold text-center mb-4">
-              Thank You for Uploading Your Receipt
-            </h2>
-            <p className="text-center mb-6">
-              Your payment will be confirmed, and a tenancy receipt will be sent to you. If there are any issues with your payment, you will be contacted.
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={handleContinueToDashboard}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-              >
-                Continue to Dashboard
-              </button>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50">
+    <div className="bg-white p-8 rounded-lg max-w-md">
+      <h2 className="text-xl font-semibold text-center mb-4">
+        Thank You for Uploading Your Receipt
+      </h2>
+      <p className="text-center mb-6">
+        Your payment will be confirmed, and a tenancy receipt will be sent to you. If there are any issues with your payment, you will be contacted.
+      </p>
+      <div className="flex justify-center"> {/* Center the button here */}
+        <button
+          onClick={handleContinueToDashboard}
+          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+        >
+          Continue to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

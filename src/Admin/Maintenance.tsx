@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MaintenanceRequest } from "../types";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-
+import axios from "axios";
 
 const socket = io("https://rental-management-backend.onrender.com");
 
@@ -28,6 +28,7 @@ const MaintenancePage: React.FC = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
 
@@ -67,6 +68,42 @@ const MaintenancePage: React.FC = () => {
     }
   }, [messages]);
 
+  const handleStatusChange = async (MaintenanceId: number, status: string ) => {
+    try {
+      const payload = {
+        status,
+        MaintenanceId,
+      };
+      const response = await fetch(`${baseURL}/maintenance/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to update status:", response.status);
+        return;
+      }
+
+      const updatedMaintenance = await response.json();
+      console.log("Status updated successfully:", updatedMaintenance);
+
+    setRequests((prev) =>
+      prev.map((req) =>
+        req.id === MaintenanceId
+          ? { ...req, status: updatedMaintenance.payload.isActive }
+          : req
+      )
+    );
+  } catch (error) {
+    console.error("Error updating status:", error);
+  }
+};
+
+
   const updateStatus = (id: number, status: string) => {
     setRequests((prev) =>
       prev.map((req) => (req.id === id ? { ...req, status } : req))
@@ -105,27 +142,27 @@ const MaintenancePage: React.FC = () => {
       <table className="w-full border-collapse border border-gray-300 mb-6">
         <thead>
           <tr className="bg-gray-200">
-            <th className="border border-gray-300 p-2">Tenant Name</th>
+            <th className="border border-gray-300 p-2">Tenant ID</th>
             <th className="border border-gray-300 p-2">Subject</th>
             <th className="border border-gray-300 p-2">Description</th>
-            <th className="border border-gray-300 p-2">Files</th>
+            <th className="border border-gray-300 p-2">CreatedAt</th>
+            <th className="border border-gray-300 p-2">Actions</th>
             <th className="border border-gray-300 p-2">Status</th>
             <th className="border border-gray-300 p-2">Date</th>
-            <th className="border border-gray-300 p-2">Actions</th>
+            <th className="border border-gray-300 p-2">Files</th>
           </tr>
         </thead>
         <tbody>
           {requests.map((req) => (
             <tr key={req.id}>
-              <td className="border border-gray-300 p-2">{req.tenantName}</td>
+              <td className="border border-gray-300 p-2">{req.userId}</td>
               <td className="border border-gray-300 p-2">{req.subject}</td>
               <td className="border border-gray-300 p-2">{req.description}</td>
-              <td className="border border-gray-300 p-2">{req.status}</td>
               <td className="border border-gray-300 p-2">{req.createdAt}</td>
               <td className="border border-gray-300 p-2">
                 <select
                   value={req.status}
-                  onChange={(e) => updateStatus(req.id, e.target.value)}
+                  onChange={(e) => handleStatusChange(req.id, e.target.value)}
                   className="p-1 border rounded"
                 >
                   <option value="Pending">Pending</option>

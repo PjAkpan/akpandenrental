@@ -1,89 +1,89 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { FiSearch, FiPlus, FiEdit, FiTrash } from "react-icons/fi";
 import axios from "axios";
-import { Tenant } from "../types";
 import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
+import { UserProfile } from "../types";
+import TenantModal from "./modal/TenantModal";
 
 const TenantManagement: React.FC = () => {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [userProfiles, setUserProfiles] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<UserProfile | null>(null);
   const [message, setMessage] = useState("");
-  const [selectedTenants, setSelectedTenants] = useState<number[]>([]);
+  const [selectedUserProfiles, setSelectedUserProfiles] = useState<number[]>([]);
   const [filters, setFilters] = useState({
     rentStatus: "",
     roomNumber: "",
   });
 
-  const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 10,
+    totalRecords: 0,
+    totalPages: 0,
+  });
 
-  useEffect(() => {
-    const fetchTenants = async () => {
+  const navigate = useNavigate();
+ 
+  const fetchUserProfiles = async (page: number, size: number) => {
       try {
         const response = await axios.get(
-          `https://rental-management-backend.onrender.com/api/users/${userId}/tenants`
+          `https://rental-management-backend.onrender.com/api/users/fetch/all?page=${page}&size=${size}&orderBy=createdAt&sort=DESC`
         );
-        setTenants(response.data);
+        console.log(response); 
+        console.log(response.data);
+
+        if (response.data?.payload?.data) {  
+        setUserProfiles(response.data.payload.data);
+        setPagination({
+          page,
+          size,
+          totalRecords: response.data.payload.totalRecords,
+          totalPages: response.data.payload.totalPages,
+        });
+      } else {
+        console.log("No data found in response.payload.data");
+      }
       } catch (error) {
         setMessage("Error fetching tenant data.");
       }
     };
-    fetchTenants();
-  }, [userId]);
 
-  useEffect(() => {
-    // Fetch initial data (mocked for now)
-    const fetchTenants = async () => {
-      const data = [
-        {
-          id: 1,
-          name: "John Doe",
-          roomNumber: 101,
-          contact: "08012345678",
-          rentStatus: "Paid",
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          roomNumber: 102,
-          contact: "08098765432",
-          rentStatus: "Due",
-        },
-      ];
-      setTenants(data);
-    };
-
-    fetchTenants();
-  }, []);
+    useEffect(() => {
+      fetchUserProfiles(pagination.page, pagination.size);
+    }, [pagination.page, pagination.size]);
+  
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const toggleSelectTenant = (id: number) => {
-    setSelectedTenants((prev) =>
+  const toggleSelectUserProfile = (id: number) => {
+    setSelectedUserProfiles((prev) =>
       prev.includes(id)
-        ? prev.filter((tenantId) => tenantId !== id)
+        ? prev.filter((profileId) => profileId !== id)
         : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    setSelectedTenants((prev) =>
-      prev.length === tenants.length ? [] : tenants.map((tenant) => tenant.id)
+    setSelectedUserProfiles((prev) =>
+      prev.length === userProfiles.length
+        ? []
+        : userProfiles.map((profile) => profile.id)
     );
   };
 
-  const filteredTenants = tenants.filter(
-    (tenant) =>
-      tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (!filters.rentStatus || tenant.rentStatus === filters.rentStatus) &&
-      (!filters.roomNumber ||
-        tenant.roomNumber.toString() === filters.roomNumber)
+  const filteredUserProfiles = userProfiles.filter(
+    (userProfile) =>
+      userProfile.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (!filters.rentStatus || userProfile.rentStatus === filters.rentStatus) &&
+      (!filters.roomNumber || userProfile.roomNumber.toString() === filters.roomNumber)
   );
+  
 
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -95,70 +95,87 @@ const TenantManagement: React.FC = () => {
   const handleExport = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      ["Name,Room Number,Contact,Rent Status"].join(",") +
+      ["Full Name,Room Number,Contact,Status"].join(",") +
       "\n" +
-      tenants
-        .map((t) => [t.name, t.roomNumber, t.contact, t.rentStatus].join(","))
+      userProfiles
+        .map((profile) => [profile.fullName, profile.roomNumber, profile.contact, profile.rentStatus].join(","))
         .join("\n");
     const encodedUri = encodeURI(csvContent);
-    saveAs(encodedUri, "tenants.csv");
+    saveAs(encodedUri, "userProfiles.csv");
   };
 
   const handleSendReminders = () => {
-    const tenantsWithUnpaidRent = tenants.filter(
-      (tenant) => tenant.rentStatus === "Due"
+    const profilesWithUnpaidRent = userProfiles.filter(
+      (profile) => profile.rentStatus === "Due"
     );
     alert(
-      `Reminders sent to tenants: ${tenantsWithUnpaidRent
-        .map((t) => t.name)
+      `Reminders sent to users: ${profilesWithUnpaidRent
+        .map((p) => p.fullName)
         .join(", ")}`
     );
   };
 
   const handleBulkDelete = () => {
-    if (window.confirm("Are you sure you want to delete selected tenants?")) {
-      setTenants((prev) =>
-        prev.filter((tenant) => !selectedTenants.includes(tenant.id))
+    if (window.confirm("Are you sure you want to delete selected profiles?")) {
+      setUserProfiles((prev) =>
+        prev.filter((userProfile) => !selectedUserProfiles.includes(userProfile.id))
       );
-      setSelectedTenants([]);
+      setSelectedUserProfiles([]);
     }
   };
 
-  const handleAddTenant = () => {
-    setSelectedTenant(null);
+  const handleAddUserProfile = () => {
+    setSelectedUserProfile(null);
     setIsModalOpen(true);
   };
-
-  const handleEditTenant = (tenant: Tenant) => {
-    setSelectedTenant(tenant);
+  const handleEditUserProfile = (userProfile: UserProfile) => {
+    setSelectedUserProfile(userProfile);
     setIsModalOpen(true);
   };
-
-  const handleDeleteTenant = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this tenant?")) {
-      setTenants((prev) => prev.filter((tenant) => tenant.id !== id));
-    }
+  const handlePaginationChange = (newPage: number) => {
+    setPagination((prev) => ({ ...prev, page: newPage }));
+    fetchUserProfiles(newPage, pagination.size);
   };
 
-  const handleReturnToDashboard = () => {
-    navigate("/dashboard");
-  };
-
-  const handleSaveTenant = async (tenant: Tenant) => {
-    if (tenant.id) {
-      // Edit existing tenant
-      setTenants((prev) =>
-        prev.map((t) => (t.id === tenant.id ? { ...t, ...tenant } : t))
-      );
-      setMessage("Tenant updated successfully!");
-    } else {
-      // Add new tenant
-          setTenants((prev) => 
-            prev.map((t) => (t.id === tenant.id ? { ...t, ...tenant } : t))
+  const handleDeleteUserProfile = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this profile?")) {
+      try {
+        await axios.delete(
+          `https://rental-management-backend.onrender.com/userProfiles/delete/${id}`
         );
-          setMessage("Tenant successfully added!");
+        setUserProfiles((prev) => prev.filter((profile) => profile.id !== id));
+        setMessage("Profile deleted successfully.");
+      } catch (error) {
+        setMessage("Error deleting profile.");
+      }
     }
-    setIsModalOpen(false);
+  };
+
+  const handleSaveUserProfile = async (userProfile: UserProfile) => {
+    try {
+      if (userProfile.id) {
+        // Edit existing profile
+        await axios.put(
+          `https://rental-management-backend.onrender.com/userProfiles/update/${userProfile.id}`,
+          userProfile
+        );
+        setUserProfiles((prev) =>
+          prev.map((profile) => (profile.id === userProfile.id ? { ...profile, ...userProfile } : profile))
+        );
+        setMessage("Profile updated successfully!");
+      } else {
+        // Add new profile
+        const response = await axios.post(
+          `https://rental-management-backend.onrender.com/api/users/add`,
+          userProfile
+        );
+        setUserProfiles((prev) => [...prev, response.data.payload.data]);
+        setMessage("Profile successfully added!");
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      setMessage("Error saving profile.");
+    }
   };
 
   return (
@@ -167,14 +184,6 @@ const TenantManagement: React.FC = () => {
 
       {/* Display message */}
       {message && <div className="mb-4 text-green-600">{message}</div>}
-
-      {/* Navigation back to Dashboard */}
-      <button
-        className="bg-gray-600 text-white px-4 py-2 rounded-lg mb-4"
-        onClick={handleReturnToDashboard}
-      >
-        Return to Dashboard
-      </button>
 
       {/* Search and Add Tenant */}
       <div className="flex justify-between items-center mb-4">
@@ -190,12 +199,12 @@ const TenantManagement: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <select
-            name="rentStatus"
+            name="status"
             className="border rounded-lg px-3 py-2"
             value={filters.rentStatus}
             onChange={handleFilterChange}
           >
-            <option value="">All Status</option>
+            <option value="">All Rent Status</option>
             <option value="Paid">Paid</option>
             <option value="Due">Due</option>
           </select>
@@ -216,7 +225,7 @@ const TenantManagement: React.FC = () => {
         </button>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-          onClick={handleAddTenant}
+            onClick={handleAddUserProfile}
         >
           <FiPlus className="mr-2" /> Add Tenant
         </button>
@@ -229,7 +238,7 @@ const TenantManagement: React.FC = () => {
             <th className="px-4 py-2">
               <input
                 type="checkbox"
-                checked={selectedTenants.length === tenants.length}
+                checked={selectedUserProfiles.length === userProfiles.length}
                 onChange={toggleSelectAll}
               />
             </th>
@@ -242,51 +251,51 @@ const TenantManagement: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredTenants.map((tenant) => (
-            <tr key={tenant.id} className="border-t">
+        {filteredUserProfiles.map((userProfile) => (
+                <tr key={userProfile.id} className="border-t">
               <td className="px-4 py-2">
                 <input
                   type="checkbox"
-                  checked={selectedTenants.includes(tenant.id)}
-                  onChange={() => toggleSelectTenant(tenant.id)}
+                  checked={selectedUserProfiles.includes(userProfile.id)}
+                  onChange={() => toggleSelectUserProfile(userProfile.id)}
                 />
               </td>
-              <td className="px-4 py-2">{tenant.name}</td>
-              <td className="px-4 py-2">{tenant.roomNumber}</td>
-              <td className="px-4 py-2">{tenant.contact}</td>
+              <td className="px-4 py-2">{userProfile.fullName}</td>
+              <td className="px-4 py-2">{userProfile.roomNumber}</td>
+              <td className="px-4 py-2">{userProfile.contact}</td>
               <td
                 className={`px-4 py-2 ${
-                  tenant.rentStatus === "Paid"
+                  userProfile.rentStatus === "Paid"
                     ? "text-green-600"
                     : "text-red-600"
                 }`}
               >
-                {tenant.rentStatus}
+                {userProfile.rentStatus}
               </td>
               <td className="px-4 py-2">
-                {tenant.leaseExpiryDate && (
+                {userProfile.leaseExpiryDate && (
                   <span
                     className={`${
-                      new Date(tenant.leaseExpiryDate).getTime() - Date.now() <=
+                      new Date(userProfile.leaseExpiryDate).getTime() - Date.now() <=
                       30 * 24 * 60 * 60 * 1000
                         ? "text-red-600"
                         : ""
                     }`}
                   >
-                    {new Date(tenant.leaseExpiryDate).toLocaleDateString()}
+                    {new Date(userProfile.leaseExpiryDate).toLocaleDateString()}
                   </span>
                 )}
               </td>
               <td className="px-4 py-2 flex space-x-2">
                 <button
                   className="text-blue-600 hover:underline"
-                  onClick={() => handleEditTenant(tenant)}
+                  onClick={() => handleEditUserProfile(userProfile)}
                 >
                   <FiEdit />
                 </button>
                 <button
                   className="text-red-600 hover:underline"
-                  onClick={() => handleDeleteTenant(tenant.id)}
+                  onClick={() => handleDeleteUserProfile(userProfile.id)}
                 >
                   <FiTrash />
                 </button>
@@ -296,12 +305,35 @@ const TenantManagement: React.FC = () => {
         </tbody>
       </table>
 
+           {/* Pagination */}
+           <div className="flex justify-between items-center mt-4">
+        <div className="text-sm">
+          Page {pagination.page} of {pagination.totalPages}
+        </div>
+        <div className="space-x-2">
+          <button
+            disabled={pagination.page === 1}
+            onClick={() => handlePaginationChange(pagination.page - 1)}
+            className="px-3 py-1 bg-gray-300 rounded-lg"
+          >
+            Prev
+          </button>
+          <button
+            disabled={pagination.page === pagination.totalPages}
+            onClick={() => handlePaginationChange(pagination.page + 1)}
+            className="px-3 py-1 bg-gray-300 rounded-lg"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
       {/* Bulk Actions */}
       <div className="mt-4 flex space-x-2">
         <button
           className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg"
           onClick={handleBulkDelete}
-          disabled={selectedTenants.length === 0}
+          disabled={selectedUserProfiles.length === 0}
         >
           Delete Selected
         </button>
@@ -313,117 +345,17 @@ const TenantManagement: React.FC = () => {
         </button>
       </div>
 
-      {/* Tenant Modal */}
-      {isModalOpen && (
+            {/* Tenant Modal */}
+            {isModalOpen && (
         <TenantModal
-          tenant={selectedTenant}
+          selectedUserProfile={selectedUserProfile}
           onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveTenant}
+          onSave={handleSaveUserProfile}
         />
       )}
     </div>
   );
 };
 
-type TenantModalProps = {
-  tenant: Tenant | null;
-  onClose: () => void;
-  onSave: (tenant: Tenant) => void;
-};
-
-const TenantModal: React.FC<TenantModalProps> = ({
-  tenant,
-  onClose,
-  onSave,
-}) => {
-  const [formData, setFormData] = useState<Tenant>(
-    tenant || { id: 0, name: "", roomNumber: 0, contact: "", rentStatus: "Due" }
-  );
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-lg font-bold mb-4">
-          {tenant ? "Edit Tenant" : "Add Tenant"}
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">Room Number</label>
-            <input
-              type="number"
-              name="roomNumber"
-              value={formData.roomNumber}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">Contact</label>
-            <input
-              type="text"
-              name="contact"
-              value={formData.contact}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-semibold mb-1">Rent Status</label>
-
-            <select
-              name="rentStatus"
-              value={formData.rentStatus}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            >
-              <option value="Paid">Paid</option>
-              <option value="Due">Due</option>
-            </select>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
 
 export default TenantManagement;

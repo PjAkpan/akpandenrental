@@ -14,6 +14,7 @@ import { PaymentHistory, RentDetails } from "../types";
 import { useQuery } from "@tanstack/react-query";
 import { getAppUrls } from "../config";
 import RentHistory from "./RentHistory";
+import AccountModal from "./modal/Account";
 
 const apiBseUrl = getAppUrls().url;
 
@@ -29,10 +30,14 @@ const CustomerDashboard: React.FC = () => {
   const [userroomNumber, setUserroomNumber] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [id, setId] = useState<string | null>(null);
+  const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [paymentHistories, setPaymentHistories] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
  
-
+  const handleOpenModal = () => {
+    setShowAccountDetails(true);
+  };
+  
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     if (!userId) {
@@ -215,7 +220,7 @@ console.log(rentDetails)
           {[
             { label: "Requests", href: "/customer/maintenance" },
             { label: "Upload Receipts", href: "/customer/receipts" },
-            { label: "Tenancy Receipt", href: "/customer/maintenance" },
+            { label: "Tenancy Receipt", href: "/customer/tenancy" },
           ].map((link) => (
             <a
               key={link.href}
@@ -265,7 +270,7 @@ console.log(rentDetails)
           {[
             { label: "Requests", href: "/customer/maintenance" },
             { label: "Upload Receipts", href: "/customer/receipts" },
-            { label: "Tenancy Receipt", href: "/customer/maintenance" },
+            { label: "Tenancy Receipt", href: "/customer/tenancy" },
           ].map((link) => (
             <a
               key={link.href}
@@ -352,13 +357,15 @@ console.log(rentDetails)
             </h3>
             <p
               className="text-xl font-bold text-purple-800 cursor-pointer"
-              onClick={() => navigate("/customer/accounts")}
+              onClick={handleOpenModal} 
             >
               Pay into any of <br />
               the listed Accounts
               <br /> HERE
             </p>
+            {showAccountDetails && <AccountModal closeModal={() => setShowAccountDetails(false)} />}
           </div>
+
         </div>
 
         {/* Charts Section */}
@@ -437,10 +444,7 @@ console.log(rentDetails)
               <h3 className="text-xl font-semibold text-center mb-4">
                 Rent Payment History
               </h3>
-
               <RentHistory />
-           
-           
             </div>
           </div>
         </div>

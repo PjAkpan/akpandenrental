@@ -19,16 +19,17 @@ export interface LoginResponse {
     };
   }
   
-  export type Tenant = {
+  export type UserProfile = {
+    fullName: string;
     id: number;
-    name: string;
-    roomNumber: number;
+    roomNumber: string | number;
     contact: string;
     rentStatus: string; // Paid or Due
     leaseExpiryDate?: string;
   };
 
   export type MaintenanceRequest = {
+    userId: ReactNode;
     id: number;
     tenantName: string;
     subject: string; 
@@ -54,6 +55,12 @@ export interface LoginResponse {
   }
 
   export interface Payment {
+    [x: string]: any;
+    id: string;
+    roomNumber: string;
+    paymentAmount: string;
+    userId: string;
+    status: string;
     tenantName: string;
     amountPaid: number;
     paymentDate: string;
@@ -61,6 +68,18 @@ export interface LoginResponse {
     tenancyReceipt: string;
     tenantEmail: string;
     tenantPhone: string;
+  }
+
+  export interface PaymentApiResponse {
+    code: number;
+    message: string;
+    payload: {
+      currentPage: number;
+      data: Payment[];
+      totalPages: number;
+      totalRecords: number;
+    };
+    status: boolean;
   }
 
   export type AnalyticsData = {
@@ -84,7 +103,9 @@ export interface LoginResponse {
 
   export interface UserContextType {
     roles: string[] | null; 
-    setUserRoles: (roles: string) => void; 
+    setUserRoles: (rolesInput: string | string[]) => void;
+    isAdmin?: boolean; 
+    isCustomer?: boolean; 
   }
 
   export interface ProtectedRouteProps {
@@ -157,4 +178,32 @@ export interface LoginResponse {
     endDate: string;
   }
   
+export interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+}
 
+export interface ErrorResponse {
+  response: {
+    data: {
+      message: string;
+    };
+  };
+}
+
+export interface ApiResponse {
+  payload: {
+    data: Payment[];
+    currentPage: number;
+    totalPages: number;
+  };
+  message: string;
+  statusCode: number;
+}
+export interface ReceiptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  receiptUrl: string | null;
+}

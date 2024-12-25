@@ -5,7 +5,7 @@ import axios from "axios";
 import { logger, useFetcher } from "netwrap";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
-import { ErrorResponse } from "../types";
+import { ErrorResponse, SignUpErrorResponse } from "../types";
 
 
 
@@ -229,7 +229,7 @@ const Signup = () => {
                   Privacy Policy
                 </a>.
               </div>
-               {error && <p className="text-red-500 mt-4">{(error as  ErrorResponse).message}</p>}
+               {error && <p className="text-red-500 mt-4">{(error as  SignUpErrorResponse).message}</p>}
                 {data && <p className="text-green-500 mt-4">Signup successful!</p>}
               <button
                 type="submit"

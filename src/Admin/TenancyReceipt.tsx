@@ -4,13 +4,14 @@ import axios from "axios";
 import SignatureCanvas from "react-signature-canvas"; 
 import "./css/TenancyReceipt.css";
 
-const TenancyReceipt = () => {
+const TenancyReceipt = ({ paymentId }: { paymentId: string }) => {
   const [receiptData, setReceiptData] = useState({
     tenantName: "",
     roomNumber: "",
     amountPaid: "",
     paymentDate: "",
-    receiptNumber: "",
+    receiptNumber: generateReceiptNumber(),
+    nextRentDueDate: "",
     purpose: "",
     landlordSignature: "",
     tenantSignature: "",
@@ -21,6 +22,60 @@ const TenancyReceipt = () => {
   const [success, setSuccess] = useState("");
   const landlordSignaturePad = useRef<SignatureCanvas>(null);
   const tenantSignaturePad = useRef<SignatureCanvas>(null);
+
+  function generateReceiptNumber() {
+    return `REC-${Date.now().toString().slice(-6)}-${Math.floor(
+      1000 + Math.random() * 9000
+    )}`;
+  }
+
+  function calculateNextRentDueDate(paymentDate: string | number | Date) {
+    if (!paymentDate) return "";
+    const date = new Date(paymentDate);
+    date.setMonth(date.getMonth() + 1); // Adds one month
+    return date.toISOString().split("T")[0]; // Returns date in YYYY-MM-DD format
+  }
+
+  useEffect(() => {
+    const fetchReceiptData = async () => {
+      try {
+        console.log("Attempting to fetch data for paymentId:", paymentId); 
+        setLoading(true);
+        const response = await axios.get(
+          `https://rental-management-backend.onrender.com/api/RentPayment/view/${paymentId}`, // Ensure this is the correct endpoint
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+        console.log("Received data:", response.data); 
+        const data = response.data;
+        setReceiptData({
+          tenantName: data.fullName,
+          roomNumber: data.roomNumber,
+          amountPaid: data.paymentAmount,
+          paymentDate: data.paymentDate,
+          receiptNumber: generateReceiptNumber(),
+          nextRentDueDate: calculateNextRentDueDate(data.paymentDate),
+          purpose: data.purpose,
+          landlordSignature: "",
+          tenantSignature: "",
+        });
+      } catch (err) {
+        console.error(err); 
+        setError("Failed to fetch data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (paymentId) {
+      console.log("Valid paymentId, fetching data...");  
+    fetchReceiptData();
+  } else {
+    setError("Invalid payment ID.");
+  }
+  }, [paymentId]);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -163,6 +218,15 @@ const TenancyReceipt = () => {
           />
         </div>
         <div className="form-group">
+          <label>Next Rent Due Date:</label>
+          <input
+            type="date"
+            name="nextRentDueDate"
+            value={receiptData.nextRentDueDate}
+            readOnly
+          />
+        </div>
+        <div className="form-group">
           <label>Purpose/Description:</label>
           <textarea
             name="purpose"
@@ -249,6 +313,9 @@ const TenancyReceipt = () => {
             </p>
             <p>
               <strong>Payment Date:</strong> {receiptData.paymentDate}
+            </p>
+            <p>
+              <strong>Next Rent Due Date:</strong> {receiptData.nextRentDueDate}
             </p>
             <p>
               <strong>Receipt Number:</strong> {receiptData.receiptNumber}

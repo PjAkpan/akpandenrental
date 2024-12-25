@@ -77,18 +77,16 @@ const Login = () => {
       if (!roles.length) {
         throw new Error("No valid roles assigned to this user.");
       }
-      setUserRoles(roles[0]);
+      setUserRoles(roles);
 
       localStorage.setItem("roles", JSON.stringify(roles)); 
 
-      const userRole = roles[0];
-      console.log("User role is:", userRole);
-      if (userRole === "customer") {
+      if (roles.includes("admin")) {
+        console.log("Redirecting to /admin/dashboard");
+        navigate("/admin/dashboard");
+      } else if (roles.includes("customer")) {
         console.log("Redirecting to /customer/dashboard");
         navigate("/customer/dashboard");
-      } else if (userRole === "admin") {
-        console.log("Redirecting to /admin/tenants");
-        navigate("/admin/tenants");
       } else {
         console.log("Redirecting to /dashboard");
         navigate("/dashboard");

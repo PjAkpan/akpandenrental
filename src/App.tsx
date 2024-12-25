@@ -28,9 +28,13 @@ import PaymentCustomer from "./Customer/PaymentCustomer";
 import ProfileCustomer from "./Customer/ProfileCustomer";
 import ChatInterface from "./Customer/RequestStatus";
 import CustomerDashboard from "./Customer/DashboardCustomer";
-import Account from "./Customer/Account";
+import Account from "./Customer/modal/Account";
 import CustomerReceipts from "./Customer/CustomerReceipts";
 import TenancyReceipt from "./Admin/TenancyReceipt";
+import CustomerTenancy from "./Customer/CustomerTenancy";
+import AdminDashboard from "./Admin/AdminDashboard";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ rolesRequired }) => {
@@ -86,6 +90,7 @@ function App() {
   return (
     <UserProvider>
       <Router>
+      <Header /> 
         <Routes>
           {/* Public Routes */}
           <Route path="/*" element={<PublicRoutes />} />
@@ -100,8 +105,11 @@ function App() {
             <Route path="payments" element={<PaymentCustomer />} />
             <Route path="request-status" element={<ChatInterface id={""} />} />
             <Route path="dashboard" element={<CustomerDashboard />} />
-            <Route path="accounts" element={<Account />} />
+            <Route path="accounts" element={<Account closeModal={function (): void {
+              throw new Error("Function not implemented.");
+            } } />} />
             <Route path="receipts" element={<CustomerReceipts />} />
+            <Route path="tenancy" element={<CustomerTenancy />} />
           </Route>
 
           {/* Admin Routes */}
@@ -115,7 +123,8 @@ function App() {
             <Route path="payment" element={<AdminPayment />} />
             <Route path="rooms" element={<RoomManagement />} />
             <Route path="profile" element={<AdminProfilePage />} />
-            <Route path="tenancy-receipt" element={<TenancyReceipt />} />
+            <Route path="tenancy-receipt" element={<TenancyReceipt paymentId={""} />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
           </Route>
 
           {/* Unauthorized Page */}
@@ -125,6 +134,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="dashboard" element={<AnalyticsDashboard />} />
         </Routes>
+        <Footer />
       </Router>
     </UserProvider>
   );

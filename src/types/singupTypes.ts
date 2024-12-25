@@ -17,7 +17,7 @@ export type SignupResponse = {
 };
 
 // Define the shape of the error response (if any)
-export type ErrorResponse = {
+export type SignUpErrorResponse = {
   response: {
     data: {
       message: string;

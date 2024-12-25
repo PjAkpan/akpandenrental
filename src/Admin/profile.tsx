@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faUser, faEnvelope, faPhone, faDoorOpen } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEnvelope, faPhone} from "@fortawesome/free-solid-svg-icons";
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [showProfileId, setShowProfileId] = useState<boolean>(false);
   const [status, setStatus] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -117,10 +116,6 @@ const ProfilePage = () => {
               <FontAwesomeIcon icon={faPhone} className="text-gray-500 mr-2" />
               <strong>Phone Number:</strong>&nbsp;{userProfile.phoneNumber || "Not provided"}
             </p>
-            <p className="flex items-center mt-2">
-              <FontAwesomeIcon icon={faDoorOpen} className="text-gray-500 mr-2" />
-              <strong>Room Number:</strong>&nbsp;{userProfile.roomNumber || "Not provided"}
-            </p>
           </div>
 
           {/* Account Details */}
@@ -128,17 +123,6 @@ const ProfilePage = () => {
             <h2 className="text-lg font-medium text-gray-700 mb-4">
               Account Details
             </h2>
-            <p className="flex items-center">
-              <strong>Profile ID:</strong>
-              <span className="ml-2">
-                {showProfileId ? userProfile.profileId : "###############"}
-              </span>
-              <FontAwesomeIcon
-                icon={showProfileId ? faEyeSlash : faEye}
-                className="ml-2 text-gray-600 cursor-pointer hover:text-gray-800"
-                onClick={() => setShowProfileId(!showProfileId)}
-              />
-            </p>
             <p className="mt-2">
               <strong>Home Address:</strong>&nbsp;
               {userProfile.homeAddress || "Not provided"}

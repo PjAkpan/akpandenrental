@@ -1,27 +1,27 @@
+/* eslint-disable no-template-curly-in-string */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable jsx-a11y/heading-has-content */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
-import {
-  FiLogOut, FiSearch, FiUser, FiMenu,FiSun, FiMoon,} from "react-icons/fi";
-import { AiOutlineHome } from "react-icons/ai";
+import { FaFileAlt, FaUpload, FaReceipt, FaUserAlt } from "react-icons/fa";
 import io from "socket.io-client";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios, { HttpStatusCode } from "axios";
-import { PaymentHistory, RentDetails } from "../types";
 import { useQuery } from "@tanstack/react-query";
 import { getAppUrls } from "../config";
 import RentHistory from "./RentHistory";
 import AccountModal from "./modal/Account";
+import "./css/Sidebar.css";
+import { FiMenu } from "react-icons/fi";
 
 const apiBseUrl = getAppUrls().url;
 
 const CustomerDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState("light");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<string[]>(["Maintenance request pending","New tenant added","Payment of ₦20,000 received", "Rent due for Room 12", ]);
   const [unreadNotifications, setUnreadNotifications] = useState<number>( notifications.length);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
@@ -31,7 +31,6 @@ const CustomerDashboard: React.FC = () => {
   const [userRole, setUserRole] = useState<string>("");
   const [id, setId] = useState<string | null>(null);
   const [showAccountDetails, setShowAccountDetails] = useState(false);
-  const [paymentHistories, setPaymentHistories] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
  
   const handleOpenModal = () => {
@@ -74,13 +73,6 @@ const CustomerDashboard: React.FC = () => {
       socket.disconnect();
     };
   }, [navigate]);
-
-  // Toggle Theme
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  }; 
-
-
 
   const { data: rentDetails,isLoading,isError, error,} = useQuery({
     queryKey: ["fetch-rent-payment-details", id],
@@ -136,155 +128,17 @@ const CustomerDashboard: React.FC = () => {
     setNotifications([]); // Clear all notifications
   };
 
- const handleLogout = async () => {
-      const userId = localStorage.getItem("userId");
-    const deviceId = localStorage.getItem("deviceId");
+  const toggleNavbar = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   
-    document.cookie =
-      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-    // Restore deviceId
-    if (deviceId) {
-      localStorage.setItem("deviceId", deviceId);
-    }
-   try {
-    // Call the logout endpoint
-    const response = await axios.post(
-      "https://rental-management-backend.onrender.com/api/users/logout",
-      { userId },
-      { headers: { "Content-Type": "application/json" } }
-    );
-
-    if (response.status === 200) {
-      // Successfully logged out
-      alert("Logged out successfully from all devices!");
-
-      // Clear sensitive data from storage
-      localStorage.clear();
-      sessionStorage.clear();
-      document.cookie =
-        "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-      // Navigate to the login page
-      navigate("/login");
-    }
-  } catch (err) {
-    // Handle errors
-    if (axios.isAxiosError(err)) {
-      if (err.response?.status === 404) {
-        console.warn("User no longer exists on the backend.");
-        alert("User account not found. Please sign up again.");
-        navigate("/login");
-      } else {
-        console.error("Error during logout:", err.message);
-        alert("Failed to log out from all devices. Please try again.");
-      }
-    } else if (err instanceof Error) {
-      console.error("Unexpected error during logout:", err.message);
-      alert("An unexpected error occurred. Please try again.");
-    } else {
-      console.error("Unknown error during logout:", err);
-    }
-  }
-};
-
-
 console.log(rentDetails)
 
   return (
-    <div
-      className={`min-h-screen flex flex-col ${
-        theme === "dark"
-          ? "bg-gray-900 text-white"
-          : "bg-gray-100 text-gray-800"
-      }`}
-    >
-      {/* Navbar */}
-      <nav
-        className={`shadow-md p-4 flex justify-between items-center ${
-          theme === "dark" ? "bg-gray-800" : "bg-white"
-        }`}
-      >
-        <div className="flex items-center space-x-4">
-          <button
-            className="text-gray-700 lg:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <FiMenu size={28} />
-          </button>
-          <AiOutlineHome size={28} className="text-blue-600" />
-          <h1 className="text-2xl font-bold">Akpaden Hostel Management</h1>
-        </div>
-
-        <div className="hidden lg:flex items-center space-x-6">
-          {[
-            { label: "Requests", href: "/customer/maintenance" },
-            { label: "Upload Receipts", href: "/customer/receipts" },
-            { label: "Tenancy Receipt", href: "/customer/tenancy" },
-          ].map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button onClick={toggleTheme}>
-            {theme === "dark" ? (
-              <FiSun size={24} className="text-yellow-500" />
-            ) : (
-              <FiMoon size={24} className="text-gray-700" />
-            )}
-          </button>
-          <div className="relative">
-            <FiSearch
-              size={20}
-              className="absolute left-3 top-3 text-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 border rounded-lg bg-gray-100 focus:outline-none"
-            />
-          </div>
-          <FiUser
-            size={28}
-            className="text-blue-600 cursor-pointer"
-            onClick={() => (window.location.href = "/customer/profile")}
-          />
-          <FiLogOut
-            size={28}
-            className="text-red-500 cursor-pointer"
-            onClick={handleLogout}
-          />
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden bg-gray-100 p-4">
-          {[
-            { label: "Requests", href: "/customer/maintenance" },
-            { label: "Upload Receipts", href: "/customer/receipts" },
-            { label: "Tenancy Receipt", href: "/customer/tenancy" },
-          ].map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="block py-2 hover:text-blue-500"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-      )}
+    <div className="flex min-h-screen flex-col">
 
       {/* Main Content */}
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Summary Cards */}
         <div className="col-span-1 lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-6">
           <div className="col-span-1 lg:col-span-4">
@@ -441,9 +295,6 @@ console.log(rentDetails)
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-center mb-4">
-                Rent Payment History
-              </h3>
               <RentHistory />
             </div>
           </div>

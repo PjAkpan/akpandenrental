@@ -1,15 +1,6 @@
 /* eslint-disable jsx-a11y/heading-has-content */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
-import {
-  FiLogOut,
-  FiSearch,
-  FiUser,
-  FiMenu,
-  FiSun,
-  FiMoon,
-} from "react-icons/fi";
-import { AiOutlineHome } from "react-icons/ai";
 import Chart from "react-apexcharts";
 import io from "socket.io-client";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +10,6 @@ import { AnalyticsData } from "../types";
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [theme, setTheme] = useState("light");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     totalRooms: 27,
     occupiedRooms: 15,
@@ -177,80 +167,6 @@ const AdminDashboard: React.FC = () => {
           : "bg-gray-100 text-gray-800"
       }`}
     >
-      {/* Navbar */}
-      <nav
-        className={`shadow-md p-4 flex justify-between items-center ${
-          theme === "dark" ? "bg-gray-800" : "bg-white"
-        }`}
-      >
-        <div className="flex items-center space-x-4">
-          <button
-            className="text-gray-700 lg:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <FiMenu size={28} />
-          </button>
-          <AiOutlineHome size={28} className="text-blue-600" />
-          <h1 className="text-2xl font-bold">Akpaden Hostel Management</h1>
-        </div>
-
-        <div className="hidden lg:flex items-center space-x-6">
-          {[
-            { label: "Rooms", href: "/admin/rooms" },
-            { label: "Requests", href: "/admin/maintenance" },
-            { label: "Tenants", href: "/admin/tenants" },
-            { label: "Payments", href: "/admin/payment" },
-          ].map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="py-2 px-4 hover:text-blue-500 hover:underline focus:ring focus:ring-blue-300"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button onClick={toggleTheme}>
-            {theme === "dark" ? (
-              <FiSun size={24} className="text-yellow-500" />
-            ) : (
-              <FiMoon size={24} className="text-gray-700" />
-            )}
-          </button>
-          <FiUser
-            size={28}
-            className="text-blue-600 cursor-pointer"
-            onClick={() => (window.location.href = "/admin/profile")}
-          />
-          <FiLogOut
-            size={28}
-            className="text-red-500 cursor-pointer"
-            onClick={handleLogout}
-          />
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden bg-gray-100 p-4">
-          {[
-            { label: "Rooms", href: "/admin/rooms" },
-            { label: "Requests", href: "/admin/maintenance" },
-            { label: "Tenants", href: "/admin/tenants" },
-            { label: "Payments", href: "/admin/payment" },
-          ].map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="block py-2 hover:text-blue-500"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-      )}
 
       {/* Main Content */}
       <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">

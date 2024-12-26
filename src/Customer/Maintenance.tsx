@@ -78,16 +78,6 @@ const MaintenanceCustomer = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 flex flex-col items-center">
-          {/* Navbar */}
-          <div className="w-full bg-white shadow-md flex items-center px-4 py-2">
-        <button onClick={() => navigate(-1)} className="mr-4 text-gray-600 hover:text-black">
-          <FiArrowLeft size={24} />
-        </button>
-        <h1 className="text-lg font-bold text-gray-800 flex-grow text-center">Maintenance Request</h1>
-        <button onClick={() => navigate('/customer/dashboard')} className="text-gray-600 hover:text-black">
-          <FiHome size={24} />
-        </button>
-      </div>
 
       <div className="max-w-lg w-full bg-white shadow-md rounded-lg p-6 mt-4">
         {/* Subject Input */}

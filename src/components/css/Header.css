@@ -1,0 +1,204 @@
+/* Header Wrapper */
+.header-wrapper {
+  width: 100%;
+  background-color: #fff;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Header Content */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Logo Section */
+.logo-section {
+  display: flex;
+}
+
+.logo {
+  height: 40px;
+}
+
+.home-icon {
+  color: #ff6600; /* Orange color */
+  cursor: pointer;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-list {
+  gap: 20px;
+  display: flex;
+}
+
+.nav-item {
+  margin-right: 20px;
+}
+
+.nav-link {
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #ff6600; /* Orange color on hover */
+}
+
+/* Logout Icon */
+.logout-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logout-icon {
+  color: #ff6600; /* Orange color */
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.logout-icon:hover {
+  color: #cc5200; /* Darker orange on hover */
+}
+
+/* Mobile Navigation */
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.mobile-menu.active {
+  display: block;
+}
+
+.mobile-nav-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-nav-item {
+  padding: 10px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.mobile-nav-item a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  font-size: 16px;
+}
+
+.mobile-nav-item a:hover {
+  background-color: #f0f0f0;
+}
+
+/* Mobile Menu Button */
+.burger-menu {
+  display: block;
+  cursor: pointer;
+  color: #ff6600;
+}
+
+.burger-menu:hover {
+  color: #cc5200;
+}
+
+/* Large Screen */
+@media (min-width: 769px) {
+  /* Main Navigation for Large Screens */
+  .nav {
+    display: flex;
+  }
+
+  .nav-list {
+    display: flex;
+    gap: 20px;
+  }
+
+  .nav-item {
+    margin-right: 20px;
+  }
+
+  .nav-item a {
+    text-decoration: none;
+    color: #333;
+  }
+
+  .nav-item a:hover {
+    color: #f79c42;
+  }
+
+  /* Hide mobile menu on large screens */
+  .mobile-menu {
+    display: none;
+  }
+
+  .burger-menu {
+    display: none; /* Hide burger menu */
+  }
+}
+
+/* Mobile Menu Icon */
+.mobile-menu-icon {
+  display: none;
+  cursor: pointer;
+  color: #ff6600; /* Orange color */
+  margin-left: 20px; /* Space between the logout icon and hamburger */
+}
+
+.mobile-menu-icon:hover {
+  color: #cc5200; /* Darker orange on hover */
+}
+
+/* Adjust mobile navigation display */
+@media (max-width: 768px) {
+  .nav {
+    display: none; /* Hide main navigation on small screens */
+  }
+
+  .mobile-menu-icon {
+    display: block; /* Show the mobile menu icon */
+  }
+
+  /* Adjust mobile menu list to be in block form */
+  .nav-list {
+    display: block;
+    width: 100%;
+    padding: 0;
+  }
+
+  .burger-menu {
+    display: block; /* Show on mobile */
+  }
+}

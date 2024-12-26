@@ -1,0 +1,85 @@
+/* src/components/Sidebar.css */
+
+/* 1. Basic styles for the sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Hidden by default */
+    width: 250px;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    padding-top: 60px;
+  }
+  
+  .sidebar.open {
+    left: 0; /* Show sidebar when toggled */
+  }
+  
+  /* 2. Styling the sidebar menu */
+  .sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar-menu li {
+    padding: 15px 20px;
+  }
+  
+  .sidebar-menu li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+  }
+  
+  /* 3. Hamburger button styling */
+  .hamburger-btn {
+    font-size: 30px;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none; /* Hide the hamburger by default */
+    z-index: 1100;
+  }
+  
+  /* 4. Mobile view (Hamburger menu) */
+  @media (max-width: 768px) {
+    .hamburger-btn {
+      display: block; /* Show the hamburger menu button on mobile */
+    }
+  
+    .sidebar {
+      left: -250px; /* Hidden by default on mobile */
+      top: 0;
+    }
+  
+    .sidebar.open {
+      left: 0; /* Show sidebar when toggled */
+    }
+  }
+  
+  /* 5. Desktop view */
+  @media (min-width: 769px) {
+    .sidebar {
+      left: 0; /* Always visible on desktop */
+      position: static;
+      width: auto;
+    }
+  
+    .hamburger-btn {
+      display: none; /* Hide the hamburger button on desktop */
+    }
+  
+    .sidebar-menu {
+      display: flex;
+      justify-content: space-around;
+    }
+  
+    .sidebar-menu li {
+      padding: 10px 20px;
+    }
+  }
+  

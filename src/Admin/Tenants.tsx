@@ -14,11 +14,7 @@ const TenantManagement: React.FC = () => {
   const [selectedUserProfile, setSelectedUserProfile] = useState<UserProfile | null>(null);
   const [message, setMessage] = useState("");
   const [selectedUserProfiles, setSelectedUserProfiles] = useState<number[]>([]);
-  const [filters, setFilters] = useState({
-    rentStatus: "",
-    roomNumber: "",
-  });
-
+  const [filters, setFilters] = useState({ rentStatus: "", roomNumber: "" });
   const [pagination, setPagination] = useState({
     page: 1,
     size: 10,
@@ -26,17 +22,22 @@ const TenantManagement: React.FC = () => {
     totalPages: 0,
   });
 
-  const navigate = useNavigate();
- 
-  const fetchUserProfiles = async (page: number, size: number) => {
-      try {
-        const response = await axios.get(
-          `https://rental-management-backend.onrender.com/api/users/fetch/all?page=${page}&size=${size}&orderBy=createdAt&sort=DESC`
-        );
-        console.log(response); 
-        console.log(response.data);
+  const [sortOptions, setSortOptions] = useState({
+    orderBy: "createdAt",
+    sort: "DESC",
+  });
 
-        if (response.data?.payload?.data) {  
+  const navigate = useNavigate();
+
+  const fetchUserProfiles = async (page: number, size: number, orderBy: string = 'createdAt', sort: string = 'DESC') => {
+    try {
+      const response = await axios.get(`https://rental-management-backend.onrender.com/api/users/fetch/all?size=2&page=1&option=&gSearch=`
+    
+      );
+      console.log(response);
+      console.log(response.data);
+
+      if (response.data?.payload?.data) {
         setUserProfiles(response.data.payload.data);
         setPagination({
           page,
@@ -47,33 +48,35 @@ const TenantManagement: React.FC = () => {
       } else {
         console.log("No data found in response.payload.data");
       }
-      } catch (error) {
-        setMessage("Error fetching tenant data.");
-      }
-    };
+    } catch (error) {
+      setMessage("Error fetching tenant data.");
+    }
+  };
 
-    useEffect(() => {
-      fetchUserProfiles(pagination.page, pagination.size);
-    }, [pagination.page, pagination.size]);
-  
+  useEffect(() => {
+    fetchUserProfiles(pagination.page, pagination.size, sortOptions.orderBy, sortOptions.sort);
+  }, [pagination.page, pagination.size, sortOptions]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  const handleSortChange = (orderBy: string) => {
+    setSortOptions((prev) => ({
+      orderBy,
+      sort: prev.sort === "ASC" ? "DESC" : "ASC",
+    }));
+  };
+
   const toggleSelectUserProfile = (id: number) => {
     setSelectedUserProfiles((prev) =>
-      prev.includes(id)
-        ? prev.filter((profileId) => profileId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((profileId) => profileId !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
     setSelectedUserProfiles((prev) =>
-      prev.length === userProfiles.length
-        ? []
-        : userProfiles.map((profile) => profile.id)
+      prev.length === userProfiles.length ? [] : userProfiles.map((profile) => profile.id)
     );
   };
 
@@ -83,11 +86,8 @@ const TenantManagement: React.FC = () => {
       (!filters.rentStatus || userProfile.rentStatus === filters.rentStatus) &&
       (!filters.roomNumber || userProfile.roomNumber.toString() === filters.roomNumber)
   );
-  
 
-  const handleFilterChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
   };
@@ -95,31 +95,25 @@ const TenantManagement: React.FC = () => {
   const handleExport = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      ["Full Name,Room Number,Contact,Status"].join(",") +
+      ["Full Name,Room Number,Contact,Status,Next Rent Due Date,Amount Paid"].join(",") +
       "\n" +
       userProfiles
-        .map((profile) => [profile.fullName, profile.roomNumber, profile.contact, profile.rentStatus].join(","))
+        .map((profile) =>
+          [profile.fullName, profile.roomNumber, profile.phoneNumber, profile.rentStatus, profile.nextRentDueDate, profile.AmountPaid].join(",")
+        )
         .join("\n");
     const encodedUri = encodeURI(csvContent);
     saveAs(encodedUri, "userProfiles.csv");
   };
 
   const handleSendReminders = () => {
-    const profilesWithUnpaidRent = userProfiles.filter(
-      (profile) => profile.rentStatus === "Due"
-    );
-    alert(
-      `Reminders sent to users: ${profilesWithUnpaidRent
-        .map((p) => p.fullName)
-        .join(", ")}`
-    );
+    const profilesWithUnpaidRent = userProfiles.filter((profile) => profile.rentStatus === "Due");
+    alert(`Reminders sent to users: ${profilesWithUnpaidRent.map((p) => p.fullName).join(", ")}`);
   };
 
   const handleBulkDelete = () => {
     if (window.confirm("Are you sure you want to delete selected profiles?")) {
-      setUserProfiles((prev) =>
-        prev.filter((userProfile) => !selectedUserProfiles.includes(userProfile.id))
-      );
+      setUserProfiles((prev) => prev.filter((userProfile) => !selectedUserProfiles.includes(userProfile.id)));
       setSelectedUserProfiles([]);
     }
   };
@@ -140,9 +134,7 @@ const TenantManagement: React.FC = () => {
   const handleDeleteUserProfile = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this profile?")) {
       try {
-        await axios.delete(
-          `https://rental-management-backend.onrender.com/userProfiles/delete/${id}`
-        );
+        await axios.delete(`https://rental-management-backend.onrender.com/api/users/delete/${id}`);
         setUserProfiles((prev) => prev.filter((profile) => profile.id !== id));
         setMessage("Profile deleted successfully.");
       } catch (error) {
@@ -154,21 +146,11 @@ const TenantManagement: React.FC = () => {
   const handleSaveUserProfile = async (userProfile: UserProfile) => {
     try {
       if (userProfile.id) {
-        // Edit existing profile
-        await axios.put(
-          `https://rental-management-backend.onrender.com/userProfiles/update/${userProfile.id}`,
-          userProfile
-        );
-        setUserProfiles((prev) =>
-          prev.map((profile) => (profile.id === userProfile.id ? { ...profile, ...userProfile } : profile))
-        );
+        await axios.put(`https://rental-management-backend.onrender.com/api/users/update/${userProfile.id}`, userProfile);
+        setUserProfiles((prev) => prev.map((profile) => (profile.id === userProfile.id ? { ...profile, ...userProfile } : profile)));
         setMessage("Profile updated successfully!");
       } else {
-        // Add new profile
-        const response = await axios.post(
-          `https://rental-management-backend.onrender.com/api/users/add`,
-          userProfile
-        );
+        const response = await axios.post("https://rental-management-backend.onrender.com/api/users/add", userProfile);
         setUserProfiles((prev) => [...prev, response.data.payload.data]);
         setMessage("Profile successfully added!");
       }
@@ -178,9 +160,20 @@ const TenantManagement: React.FC = () => {
     }
   };
 
+  const handleBackToDashboard = () => {
+     navigate("/admin/dashboard");
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Tenant Management</h1>
+
+      <button
+onClick={handleBackToDashboard}
+className="bg-blue-500 text-white py-2 px-4 rounded-md mb-4"
+>
+Back to Dashboard
+</button>
 
       {/* Display message */}
       {message && <div className="mb-4 text-green-600">{message}</div>}
@@ -199,7 +192,7 @@ const TenantManagement: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <select
-            name="status"
+           name="rentStatus"
             className="border rounded-lg px-3 py-2"
             value={filters.rentStatus}
             onChange={handleFilterChange}
@@ -217,111 +210,79 @@ const TenantManagement: React.FC = () => {
             onChange={handleFilterChange}
           />
         </div>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-          onClick={handleExport}
-        >
-          Export Data
-        </button>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
-            onClick={handleAddUserProfile}
-        >
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={handleExport}>Export Data</button>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center" onClick={handleAddUserProfile}>
           <FiPlus className="mr-2" /> Add Tenant
         </button>
       </div>
 
-      {/* Tenants Table */}
-      <table className="w-full bg-white rounded-lg shadow-lg">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="px-4 py-2">
-              <input
-                type="checkbox"
-                checked={selectedUserProfiles.length === userProfiles.length}
-                onChange={toggleSelectAll}
-              />
-            </th>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Room Number</th>
-            <th className="px-4 py-2">Contact</th>
-            <th className="px-4 py-2">Rent Status</th>
-            <th className="px-4 py-2">Lease Expiry</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-        {filteredUserProfiles.map((userProfile) => (
-                <tr key={userProfile.id} className="border-t">
-              <td className="px-4 py-2">
-                <input
-                  type="checkbox"
-                  checked={selectedUserProfiles.includes(userProfile.id)}
-                  onChange={() => toggleSelectUserProfile(userProfile.id)}
-                />
-              </td>
-              <td className="px-4 py-2">{userProfile.fullName}</td>
-              <td className="px-4 py-2">{userProfile.roomNumber}</td>
-              <td className="px-4 py-2">{userProfile.contact}</td>
-              <td
-                className={`px-4 py-2 ${
-                  userProfile.rentStatus === "Paid"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+      {/* Table with Sorting */}
+      <div className="overflow-x-auto">
+  <table className="min-w-full bg-white border">
+    <thead>
+      <tr>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Full Name</th>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Email</th>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Room Number</th>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Phone Number</th>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Status</th>
+        <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-gray-600 uppercase">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {userProfiles.map((profile) => (
+        <tr key={profile.id} className="bg-gray-100 hover:bg-gray-200">
+          <td className="px-6 py-4 border-b border-gray-300">{profile.userInfo.fullName}</td>
+          <td className="px-6 py-4 border-b border-gray-300">{profile.email}</td>
+          <td className="px-6 py-4 border-b border-gray-300">{profile.userInfo.roomNumber}</td>
+          <td className="px-6 py-4 border-b border-gray-300">{profile.userInfo.phoneNumber}</td>
+          <td className="px-6 py-4 border-b border-gray-300">
+            {profile.isActive ? (
+              <span className="text-green-600 font-bold">Active</span>
+            ) : (
+              <span className="text-red-600 font-bold">Inactive</span>
+            )}
+          </td>
+          <td className="px-6 py-4 border-b border-gray-300">
+            <div className="flex space-x-2">
+              <button
+                className="text-blue-600 hover:underline"
+                onClick={() => handleEditUserProfile(profile)}
               >
-                {userProfile.rentStatus}
-              </td>
-              <td className="px-4 py-2">
-                {userProfile.leaseExpiryDate && (
-                  <span
-                    className={`${
-                      new Date(userProfile.leaseExpiryDate).getTime() - Date.now() <=
-                      30 * 24 * 60 * 60 * 1000
-                        ? "text-red-600"
-                        : ""
-                    }`}
-                  >
-                    {new Date(userProfile.leaseExpiryDate).toLocaleDateString()}
-                  </span>
-                )}
-              </td>
-              <td className="px-4 py-2 flex space-x-2">
-                <button
-                  className="text-blue-600 hover:underline"
-                  onClick={() => handleEditUserProfile(userProfile)}
-                >
-                  <FiEdit />
-                </button>
-                <button
-                  className="text-red-600 hover:underline"
-                  onClick={() => handleDeleteUserProfile(userProfile.id)}
-                >
-                  <FiTrash />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                Edit
+              </button>
+              <button
+                className="text-red-600 hover:underline"
+                onClick={() => handleDeleteUserProfile(profile.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
-           {/* Pagination */}
-           <div className="flex justify-between items-center mt-4">
+
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-4">
         <div className="text-sm">
           Page {pagination.page} of {pagination.totalPages}
         </div>
         <div className="space-x-2">
-          <button
-            disabled={pagination.page === 1}
+        <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             onClick={() => handlePaginationChange(pagination.page - 1)}
-            className="px-3 py-1 bg-gray-300 rounded-lg"
+            disabled={pagination.page === 1}
           >
             Prev
           </button>
           <button
-            disabled={pagination.page === pagination.totalPages}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             onClick={() => handlePaginationChange(pagination.page + 1)}
-            className="px-3 py-1 bg-gray-300 rounded-lg"
+            disabled={pagination.page === pagination.totalPages}
           >
             Next
           </button>
@@ -345,17 +306,16 @@ const TenantManagement: React.FC = () => {
         </button>
       </div>
 
-            {/* Tenant Modal */}
-            {isModalOpen && (
+      {/* Tenant Modal */}
+      {isModalOpen && (
         <TenantModal
           selectedUserProfile={selectedUserProfile}
-          onClose={() => setIsModalOpen(false)}
           onSave={handleSaveUserProfile}
+          onClose={() => setIsModalOpen(false)}
         />
       )}
     </div>
   );
 };
-
 
 export default TenantManagement;

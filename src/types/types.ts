@@ -20,6 +20,12 @@ export interface LoginResponse {
   }
   
   export type UserProfile = {
+    userInfo: any;
+    email: ReactNode;
+    isActive: any;
+    phoneNumber: any;
+    nextRentDueDate: any;
+    AmountPaid: any;
     fullName: string;
     id: number;
     roomNumber: string | number;
@@ -206,4 +212,15 @@ export interface ReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
   receiptUrl: string | null;
+}
+
+export interface RentDetails {
+  id: string;
+  // other fields based on the API response
+}
+
+export interface RentPaymentResponse {
+  payload: {
+    data: RentDetails[];
+  };
 }

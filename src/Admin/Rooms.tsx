@@ -15,53 +15,54 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const RoomManagement: React.FC = () => {
-  const [rooms, setRooms] = useState<{ id: number; roomNumber: string; status: string }[]>([]);
+  const [rooms, setRooms] = useState<{ id: string; roomNumber: string; status: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [roomStats, setRoomStats] = useState({ vacant: 0, occupied: 0, underMaintenance: 0 });
+  const [roomStats, setRoomStats] = useState({ available: 0, occupied: 0, underMaintenance: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserProfiles = async () => {
+    const fetchRooms = async () => {
       try {
-        // Fetch user profiles to get room numbers
-        const userProfilesResponse = await fetch(
-          "https://rental-management-backend.onrender.com/api/userProfiles"
+        const response = await fetch(
+          "https://rental-management-backend.onrender.com/api/rooms/fetch/all?size=10&page=1&option=STATUS&gSearch=available"
         );
-        const userProfilesData = await userProfilesResponse.json();
-        if (Array.isArray(userProfilesData)) {
-            const extractedRooms = userProfilesData.map((profile) => ({
-              id: profile.profileId,
-              roomNumber: profile.roomNumber,
-              status: profile.roomStatus, 
-    }));
-    setRooms(extractedRooms);
-    updateRoomStats(extractedRooms);
-    } else {
-        console.error("Expected an array but received:", userProfilesData);
-      }
-        setIsLoading(false);
+        const data = await response.json();
+
+        if (data.status && data.payload?.data) {
+          const fetchedRooms = data.payload.data.map((room: any) => ({
+            id: room.id,
+            roomNumber: room.roomNumber,
+            status: room.roomStatus,
+          }));
+
+          setRooms(fetchedRooms);
+          updateRoomStats(fetchedRooms);
+        } else {
+          console.error("Unexpected API response:", data);
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching room data:", error);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUserProfiles();
+    fetchRooms();
   }, []);
 
-  const updateRoomStats = (rooms: any[]) => {
-    const stats = { vacant: 0, occupied: 0, underMaintenance: 0 };
-    rooms.forEach((room: { status: string; }) => {
-      if (room.status === "vacant") stats.vacant++;
+  const updateRoomStats = (rooms: { status: string }[]) => {
+    const stats = { available: 0, occupied: 0, underMaintenance: 0 };
+    rooms.forEach((room) => {
+      if (room.status === "available") stats.available++;
       if (room.status === "occupied") stats.occupied++;
       if (room.status === "under maintenance") stats.underMaintenance++;
     });
     setRoomStats(stats);
   };
 
-  const handleStatusChange = async (roomId: number, newStatus: string) => {
+  const handleStatusChange = async (roomId: string, newStatus: string) => {
     try {
-      await fetch(`https://rental-management-backend.onrender.com/api/userProfiles/${roomId}`, {
+      await fetch(`https://rental-management-backend.onrender.com/api/rooms/update/${roomId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -70,29 +71,26 @@ const RoomManagement: React.FC = () => {
       });
 
       // Update the room locally
-      setRooms((prevRooms) =>
-        prevRooms.map((room) =>
-          room.id === roomId ? { ...room, status: newStatus } : room
-        )
+      const updatedRooms = rooms.map((room) =>
+        room.id === roomId ? { ...room, status: newStatus } : room
       );
-
-      // Update statistics
-      updateRoomStats(rooms);
+      setRooms(updatedRooms);
+      updateRoomStats(updatedRooms);
     } catch (error) {
       console.error("Error updating room status:", error);
     }
   };
 
   const handleBackToDashboard = () => {
-    navigate("/dashboard");
+    navigate("/admin/dashboard");
   };
 
   const chartData = {
-    labels: ["Vacant", "Occupied", "Under Maintenance"],
+    labels: ["Available", "Occupied", "Under Maintenance"],
     datasets: [
       {
         label: "Room Status",
-        data: [roomStats.vacant, roomStats.occupied, roomStats.underMaintenance],
+        data: [roomStats.available, roomStats.occupied, roomStats.underMaintenance],
         backgroundColor: ["#34D399", "#F87171", "#FBBF24"],
         borderColor: ["#10B981", "#EF4444", "#F59E0B"],
         borderWidth: 1,
@@ -148,22 +146,22 @@ const RoomManagement: React.FC = () => {
             </thead>
             <tbody>
               {rooms.map((room) => (
-                  <tr key={room.id}>
-                    <td className="py-2 px-4 border-b">{room.roomNumber}</td>
-                    <td className="py-2 px-4 border-b">{room.status}</td>
-                    <td className="py-2 px-4 border-b">
-                      <select
-                        value={room.status}
-                        onChange={(e) => handleStatusChange(room.id, e.target.value)}
-                        className="border p-2 rounded"
-                      >
-                        <option value="vacant">Vacant</option>
-                        <option value="occupied">Occupied</option>
-                        <option value="under maintenance">Under Maintenance</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
+                <tr key={room.id}>
+                  <td className="py-2 px-4 border-b">{room.roomNumber}</td>
+                  <td className="py-2 px-4 border-b">{room.status}</td>
+                  <td className="py-2 px-4 border-b">
+                    <select
+                      value={room.status}
+                      onChange={(e) => handleStatusChange(room.id, e.target.value)}
+                      className="border p-2 rounded"
+                    >
+                      <option value="available">Available</option>
+                      <option value="occupied">Occupied</option>
+                      <option value="under maintenance">Under Maintenance</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </>

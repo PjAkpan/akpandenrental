@@ -1,9 +1,9 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
   const { userRole, setUserRole } = useUserContext();
-
+ const navigate = useNavigate();
   // Update role dynamically for testing (optional)
   const handleRoleChange = (role: string) => {
     setUserRole(role);
@@ -62,3 +62,75 @@ function useUserContext(): { userRole: any; setUserRole: any; } {
   throw new Error("Function not implemented.");
 }
 
+const handleBackToDashboard = () => {
+  // navigate("/dashboard");
+};
+
+<button
+onClick={handleBackToDashboard}
+className="bg-blue-500 text-white py-2 px-4 rounded-md mb-4"
+>
+Back to Dashboard
+</button>
+
+
+         {/* <th className="px-4 py-2">Name</th>
+            <th className="px-4 py-2">Room Number</th>
+            <th className="px-4 py-2">Contact</th>
+            <th className="px-4 py-2">Rent Status</th>
+            <th className="px-4 py-2">Lease Expiry</th>
+            <th className="px-4 py-2">Actions</th> */}
+
+                   {/* <tbody>
+        {filteredUserProfiles.map((userProfile) => (
+                <tr key={userProfile.id} className="border-t">
+              <td className="px-4 py-2">
+                <input
+                  type="checkbox"
+                  checked={selectedUserProfiles.includes(userProfile.id)}
+                  onChange={() => toggleSelectUserProfile(userProfile.id)}
+                />
+              </td>
+              <td className="px-4 py-2">{userProfile.fullName}</td>
+              <td className="px-4 py-2">{userProfile.roomNumber}</td>
+              <td className="px-4 py-2">{userProfile.contact}</td>
+              <td
+                className={`px-4 py-2 ${
+                  userProfile.rentStatus === "Paid"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {userProfile.rentStatus}
+              </td>
+              <td className="px-4 py-2">
+                {userProfile.leaseExpiryDate && (
+                  <span
+                    className={`${
+                      new Date(userProfile.leaseExpiryDate).getTime() - Date.now() <=
+                      30 * 24 * 60 * 60 * 1000
+                        ? "text-red-600"
+                        : ""
+                    }`}
+                  >
+                    {new Date(userProfile.leaseExpiryDate).toLocaleDateString()}
+                  </span>
+                )}
+              </td>
+              <td className="px-4 py-2 flex space-x-2">
+                <button
+                  className="text-blue-600 hover:underline"
+                  onClick={() => handleEditUserProfile(userProfile)}
+                >
+                  <FiEdit />
+                </button>
+                <button
+                  className="text-red-600 hover:underline"
+                  onClick={() => handleDeleteUserProfile(userProfile.id)}
+                >
+                  <FiTrash />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody> */}

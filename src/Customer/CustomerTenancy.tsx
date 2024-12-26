@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiLogOut } from "react-icons/fi";
+import { useQuery } from "@tanstack/react-query";
+import { RentPaymentResponse } from "../types";
 
 const CustomerTenancy: React.FC = () => {
   const navigate = useNavigate();
@@ -10,9 +12,11 @@ const CustomerTenancy: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [receiptRequest, setReceiptRequest] = useState<"email" | "whatsapp" | null>(null);
   const [receiptLoading, setReceiptLoading] = useState(false);
-
+  const [requestId, setRequestId] = useState<string | null>(null); 
+  const [rentDetails, setRentDetails] = useState<RentPaymentResponse | null>(null);
+  const [rentLoading, setRentLoading] = useState(true);
+  const [rentError, setRentError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch userId from localStorage or API (if necessary)
@@ -79,63 +83,93 @@ const CustomerTenancy: React.FC = () => {
     }
   };
 
-  const handleRequestReceipt = async (method: "email" | "whatsapp") => {
-    setReceiptLoading(true);
-    setReceiptRequest(method);
+  useEffect(() => {
+    // Fetch rent payment details
+    const fetchRentDetails = async () => {
+      if (!userId) return;
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `https://rental-management-backend.onrender.com/api/RentPayment/fetch/all?size=10&page=1&option=USERID&gSearch=${userId}&option=STATUS&gSearch=active`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.status === 200) {
+          const rentData = response.data;
+          if (rentData?.payload?.data?.length > 0) {
+            setRentDetails(rentData.payload.data[0]);
+            setRequestId(rentData.payload.data[0].id); // Set requestId if data exists
+          } else {
+            setRentError("No active rent payment found.");
+          }
+        } else {
+          setRentError("Failed to fetch rent details.");
+        }
+      } catch (err: any) {
+        setRentError(err.message || "An error occurred while fetching rent details.");
+      } finally {
+        setRentLoading(false);
+      }
+    };
 
-    try {
-      const response = await axios.post(
-        "https://rental-management-backend.onrender.com/api/receipts/request",
-        {
-          userId,
-          method,
+    fetchRentDetails();
+  }, [userId]);
+
+    const handleRequestReceipt = async () => {
+      if (!requestId) {
+        setError("Invalid request ID. Please try again.");
+        return; // Prevent API call if requestId is invalid
+      }
+      setReceiptLoading(true);
+  
+      try {
+        console.log("Sending request to backend with requestId:", requestId); // Debugging log
+        const response = await axios.get(
+          `https://rental-management-backend.onrender.com/api/RentPayment/generate/receipt/${requestId}`,
+          {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          responseType: 'blob',
         }
       );
-
+  
       if (response.status === 200) {
-        setSuccessMessage(
-          `Receipt will be sent to your ${method === "email" ? "email" : "WhatsApp"} shortly.`
-        );
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Rent_Receipt_${requestId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(url);
+        setSuccessMessage("Your Tenancy Receipt is ready for download.");
       } else {
         throw new Error(response.data.message || "Failed to request receipt.");
       }
+      console.log("Receipt generated:", response.data);
     } catch (err: any) {
       setError(err.message || "An error occurred while requesting the receipt.");
     } finally {
       setReceiptLoading(false);
     }
   };
+  
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Navbar */}
-      <nav className="bg-white shadow-md p-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <FiArrowLeft size={24} />
-          <span className="ml-2 font-semibold">Back</span>
-        </button>
-        <h1 className="text-xl font-bold text-gray-800">Tenancy Receipt</h1>
-        <button
-          onClick={handleLogout}
-          className="flex items-center text-red-600 hover:text-red-800"
-        >
-          <FiLogOut size={24} />
-          <span className="ml-2 font-semibold">Logout</span>
-        </button>
-      </nav>
+
 
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-center">Upload your Tenancy Receipt</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">
+            Upload your Tenancy Receipt
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <p className="text-red-500 text-center">{error}</p>}
             {successMessage && (
@@ -167,27 +201,15 @@ const CustomerTenancy: React.FC = () => {
               </button>
             </div>
           </form>
-
           <div className="mt-8 text-center">
-            <h3 className="text-lg font-semibold">Request Tenancy Receipt</h3>
+            <h3 className="text-lg font-semibold">Generate Tenancy Receipt</h3>
             <div className="flex justify-center mt-4 space-x-4">
               <button
-                onClick={() => handleRequestReceipt("email")}
+                onClick={() => handleRequestReceipt()}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 disabled={receiptLoading}
               >
-                {receiptLoading && receiptRequest === "email"
-                  ? "Requesting..."
-                  : "Send to Email"}
-              </button>
-              <button
-                onClick={() => handleRequestReceipt("whatsapp")}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                disabled={receiptLoading}
-              >
-                {receiptLoading && receiptRequest === "whatsapp"
-                  ? "Requesting..."
-                  : "Send to WhatsApp"}
+                {receiptLoading ? "Generating..." : "Generate"}
               </button>
             </div>
           </div>

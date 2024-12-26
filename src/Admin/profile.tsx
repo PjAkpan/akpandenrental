@@ -146,7 +146,7 @@ const ProfilePage = () => {
         <footer className="mt-8 text-center">
           <button
             className="bg-gray-800 text-white py-2 px-6 rounded-lg font-medium hover:bg-gray-900 transition-all"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/admin/dashboard")}
           >
             Back to Dashboard
           </button>

@@ -156,25 +156,6 @@ const CustomerReceipts: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Navbar */}
-      <nav className="bg-white shadow-md p-4 flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <FiArrowLeft size={24} />
-          <span className="ml-2 font-semibold">Back</span>
-        </button>
-        <h1 className="text-xl font-bold text-gray-800">Upload Receipts</h1>
-        <button
-          onClick={handleLogout}
-          className="flex items-center text-red-600 hover:text-red-800"
-        >
-          <FiLogOut size={24} />
-          <span className="ml-2 font-semibold">Logout</span>
-        </button>
-      </nav>
-
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">

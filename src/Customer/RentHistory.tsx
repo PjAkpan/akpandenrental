@@ -28,19 +28,19 @@ const RentPayments = () => {
     try {
       console.log(`Making API call for page: ${pageNumber}`);
       const response = await axios.get<ApiResponse>(
-        `https://rental-management-backend.onrender.com/api/RentPayment/fetch/all`,
+        `https://rental-management-backend.onrender.com/api/RentPayment/fetch/all?size=${String(size)}&page=${String(pageNumber)}&option=USERID&gSearch={{USERID}}`,
         {
           params: {
-            size,
-            page: pageNumber,
             option: ["USERID", "STATUS"],
-            gSearch: [userId, "active"],
+            gSearch: [userId],
           },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         }
       );
+      
+      
       console.log("API Response:", response.data);
       const { data, currentPage, totalPages } = response.data.payload;
       setPayments(data);

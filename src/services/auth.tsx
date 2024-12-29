@@ -4,6 +4,8 @@ import { logger } from "netwrap";
 import { costomencryDecryptInternalCRYPTOJS, createFetcher } from "../utils";
 import { getAppUrls } from "../config";
 import { LoginResponse } from "../types";
+import axios, { AxiosError } from "axios";
+import { ErrorResponse, SignUpErrorResponse } from "../types";
 
 // Define the backend keys and IV (for decryption)
 const keyBase64 = getAppUrls().secret;
@@ -77,3 +79,21 @@ if (data.payload.userId) {
 };
 
 
+// Function to handle user signup
+export const signUp = async (userData: any) => {
+  try {
+    const response = await axios.post(
+      "https://rental-management-backend.onrender.com/api/users/add",
+      userData,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    const error = err as AxiosError<SignUpErrorResponse>;
+    throw new Error(
+     error.response?.data?.message || "Signup failed, please try again."
+    );
+  }
+};

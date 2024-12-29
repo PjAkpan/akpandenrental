@@ -1,6 +1,5 @@
-import {  fetchSingleMaintenanceRequest  } from './chatService';
-import { loginUser } from './auth';
-import { fetchUserProfile, updateUserOccupation } from "./userService";
-import { submitMaintenanceRequest } from "./maintenanceService";
+import {  fetchSingleMaintenanceRequest  } from './customer/chatService';
+import { loginUser, signUp } from './auth';
+import { fetchUserProfile, updateUserOccupation } from "./customer/userService";
 
-export { loginUser, fetchUserProfile, updateUserOccupation, submitMaintenanceRequest,  fetchSingleMaintenanceRequest };
+export { loginUser, fetchUserProfile, updateUserOccupation, fetchSingleMaintenanceRequest, signUp };

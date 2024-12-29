@@ -7,7 +7,7 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../types";
-import {  fetchSingleMaintenanceRequest } from "../services/chatService"; // Importing the service
+import {  fetchSingleMaintenanceRequest } from "../services/customer/index"; // Importing the service
 
 const socket = io("https://rental-management-backend.onrender.com", {
   transports: ["websocket"], // Ensures a stable connection

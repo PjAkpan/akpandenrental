@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {  faUser, faEnvelope, faPhone, faDoorOpen, faCog } from "@fortawesome/free-solid-svg-icons";
-import { fetchUserProfile, updateUserOccupation } from "../services/userService"; 
+import { fetchUserProfile, updateUserOccupation } from "../services/customer/userService"; 
 
 const ProfileCustomer = () => {
   const [userProfile, setUserProfile] = useState<any>(null);

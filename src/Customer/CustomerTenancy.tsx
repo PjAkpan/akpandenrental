@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { RentPaymentResponse } from "../types";
+import { uploadTenancyReceipt, fetchRentDetails, requestReceipt } from "../services/customer/index";
 
 const CustomerTenancy: React.FC = () => {
   const navigate = useNavigate();
@@ -58,24 +58,12 @@ const CustomerTenancy: React.FC = () => {
 
     setError(null);
     setSuccessMessage(null);
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      const response = await axios.post(
-        "https://rental-management-backend.onrender.com/api/RentPayment/add/tenancy",formData,  {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`, 
-            },
-          });
-
-      if (response.status === 201) {
-        setSuccessMessage("Tenancy payment added successfully!");
-        setPictureProof(null);
-      } else {
-        throw new Error(response.data.message || "Failed to upload payment.");
-      }
+      await uploadTenancyReceipt(userId, pictureProof);
+      setSuccessMessage("Tenancy payment added successfully!");
+      setPictureProof(null);
     } catch (err: any) {
       setError(err.message || "An error occurred while uploading payment.");
     } finally {
@@ -84,29 +72,17 @@ const CustomerTenancy: React.FC = () => {
   };
 
   useEffect(() => {
-    // Fetch rent payment details
-    const fetchRentDetails = async () => {
+    const getRentDetails = async () => {
       if (!userId) return;
+      setRentLoading(true);
+
       try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `https://rental-management-backend.onrender.com/api/RentPayment/fetch/all?size=10&page=1&option=USERID&gSearch=${userId}&option=STATUS&gSearch=active`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.status === 200) {
-          const rentData = response.data;
-          if (rentData?.payload?.data?.length > 0) {
-            setRentDetails(rentData.payload.data[0]);
-            setRequestId(rentData.payload.data[0].id); // Set requestId if data exists
-          } else {
-            setRentError("No active rent payment found.");
-          }
+        const data = await fetchRentDetails(userId);
+        if (data?.payload?.data?.length > 0) {
+          setRentDetails(data.payload.data[0]);
+          setRequestId(data.payload.data[0].id);
         } else {
-          setRentError("Failed to fetch rent details.");
+          setRentError("No active rent payment found.");
         }
       } catch (err: any) {
         setRentError(err.message || "An error occurred while fetching rent details.");
@@ -115,41 +91,26 @@ const CustomerTenancy: React.FC = () => {
       }
     };
 
-    fetchRentDetails();
+    getRentDetails();
   }, [userId]);
 
-    const handleRequestReceipt = async () => {
-      if (!requestId) {
-        setError("Invalid request ID. Please try again.");
-        return; // Prevent API call if requestId is invalid
-      }
-      setReceiptLoading(true);
-  
-      try {
-        console.log("Sending request to backend with requestId:", requestId); // Debugging log
-        const response = await axios.get(
-          `https://rental-management-backend.onrender.com/api/RentPayment/generate/receipt/${requestId}`,
-          {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          responseType: 'blob',
-        }
-      );
-  
-      if (response.status === 200) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `Rent_Receipt_${requestId}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        window.URL.revokeObjectURL(url);
-        setSuccessMessage("Your Tenancy Receipt is ready for download.");
-      } else {
-        throw new Error(response.data.message || "Failed to request receipt.");
-      }
-      console.log("Receipt generated:", response.data);
+  const handleRequestReceipt = async () => {
+    if (!requestId) {
+      setError("Invalid request ID. Please try again.");
+      return;
+    }
+
+    setReceiptLoading(true);
+    try {
+      const receiptData = await requestReceipt(requestId);
+      const url = window.URL.createObjectURL(new Blob([receiptData]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Rent_Receipt_${requestId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      setSuccessMessage("Your Tenancy Receipt is ready for download.");
     } catch (err: any) {
       setError(err.message || "An error occurred while requesting the receipt.");
     } finally {
@@ -157,13 +118,8 @@ const CustomerTenancy: React.FC = () => {
     }
   };
   
-
-
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-
-
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">

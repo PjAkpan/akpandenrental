@@ -17,19 +17,6 @@ const Header: React.FC = () => {
 
   const shouldHideHeader = noHeaderPages.includes(location.pathname);
 
-  // useEffect(() => {
-  //   // Redirect the user based on their role
-  //   if (userRole) {
-  //     if (userRole === "admin") {
-  //       navigate("/admin/dashboard");
-  //     } else if (userRole === "customer") {
-  //       navigate("/customer/dashboard");
-  //     } else {
-  //       navigate("/dashboard");
-  //     }
-  //   }
-  // }, [navigate, userRole]);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };

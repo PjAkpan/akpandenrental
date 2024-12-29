@@ -224,3 +224,9 @@ export interface RentPaymentResponse {
     data: RentDetails[];
   };
 }
+
+export interface RentPaymentsResponse {
+  data: Payment[];
+  currentPage: number;
+  totalPages: number;
+}

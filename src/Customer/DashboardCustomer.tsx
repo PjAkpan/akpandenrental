@@ -13,8 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAppUrls } from "../config";
 import RentHistory from "./RentHistory";
 import AccountModal from "./modal/Account";
-import "./css/Sidebar.css";
-import { FiMenu } from "react-icons/fi";
+
 
 const apiBseUrl = getAppUrls().url;
 
@@ -74,7 +73,7 @@ const CustomerDashboard: React.FC = () => {
     };
   }, [navigate]);
 
-  const { data: rentDetails,isLoading,isError, error,} = useQuery({
+  const { data: rentDetails,isLoading,isError, error} = useQuery({
     queryKey: ["fetch-rent-payment-details", id],
     queryFn: async () => {
       const USERID = localStorage.getItem("userId");
@@ -312,4 +311,3 @@ function responseObject(arg0: { res: any; statusCode: HttpStatusCode; message: a
 function errorHandler(err: Error, arg1: null) {
   throw new Error("Function not implemented.");
 }
-

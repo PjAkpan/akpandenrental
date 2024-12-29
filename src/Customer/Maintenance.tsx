@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FiArrowLeft, FiHome } from "react-icons/fi";
-import { submitMaintenanceRequest } from '../services/maintenanceService';
+import { submitMaintenanceRequest } from '../services/customer/index';
 import Modal from './modal/MaintenanceModal';
 
 

@@ -1,5 +1,5 @@
 
-import { createFetcher } from '../utils';
+import { createFetcher } from '../../utils';
 
 
 const BASE_URL = "https://rental-management-backend.onrender.com/api";

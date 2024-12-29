@@ -2,12 +2,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from "react";
 import axios from "axios";
-import { logger, useFetcher } from "netwrap";
+import { signUp } from "../services/index"; 
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft } from "react-icons/fi";
-import { ErrorResponse, SignUpErrorResponse } from "../types";
-
-
 
 const Signup = () => {
   const [email, setUsername] = useState("");
@@ -18,87 +14,38 @@ const Signup = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const navigate = useNavigate();
 
-  const deviceId = localStorage.getItem("deviceId");
- const { trigger: handleSignup, isLoading, data, error } = useFetcher({
-    queryFn: async () => {
-      try {
-        const response = await axios.post(
-          "https://rental-management-backend.onrender.com/api/users/add",
-          {
-              email,
-            fullName,
-            password,
-            password2,
-            roomNumber,
-            phoneNumber,
-           deviceId,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-        console.log("Response from server:", response.data);
-        return response.data; // Return response data if the request is successful
-      } catch (err) {
-        const errorMessage =
-          (err as ErrorResponse).response?.data?.message || "Signup failed";
-        throw new Error(errorMessage);
-      }
-    },
-    onSuccess: (data) => {
-      console.log("Signup successful, data received:", data);
+ 
 
-      const { referenceId, deviceId } = data.payload;
-
+  const handleSignup = async (e?: { preventDefault: () => void }) => {
+    if (e) {
+      e.preventDefault();
+    }
+    const deviceId = localStorage.getItem("deviceId");
+    try {
+      const userData = { email, fullName, password, password2, roomNumber, phoneNumber, deviceId };
+      const data = await signUp(userData); // Call the signUp function from auth.js
+  
+      const { referenceId, deviceId: responseDeviceId } = data.payload;
+  
       if (referenceId) {
         localStorage.setItem("referenceId", referenceId);
-        console.log("Navigating to verify-otp page with referenceId:", referenceId);
-      navigate("/verify-otp", { state: { email, referenceId } });
-    } else {
-      console.error("referenceId is missing in the response data.");
-      alert("Signup successful, but reference ID is missing.");
+        navigate("/verify-otp", { state: { email, referenceId } });
+      }
+      if (responseDeviceId) {
+        localStorage.setItem("deviceId", responseDeviceId);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Error during signup:", err.message);
+      } else {
+        console.error("Unknown error during signup");
+      }
     }
-    if (deviceId) {
-      localStorage.setItem("deviceId", deviceId);
-      console.log("Device ID saved to localStorage:", deviceId);
-    } else {
-      console.error("Device ID is missing in the response data.");
-    }
-    },
-    onError: (err) => {
-      console.error("Error during signup:", (err as Error).message);
-    },
-  });
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("referenceId"); 
-    sessionStorage.clear();
-    document.cookie =
-      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    console.log("User logged out");
-    navigate("/login");
   };
+  
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
-      {/* Navbar */}
-      <nav className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <FiArrowLeft size={24} />
-          <span className="ml-2 font-medium">Back</span>
-        </button>
-        <button
-          onClick={handleLogout}
-          className="text-red-500 font-semibold hover:text-red-700"
-        >
-          Logout
-        </button>
-      </nav>
-
       {/* Signup Form */}
       <div className="flex-grow flex justify-center items-center p-6">
         <div className="bg-white p-10 rounded-xl shadow-lg max-w-md w-full">
@@ -109,18 +56,9 @@ const Signup = () => {
             Create an account to manage your rental space.
           </p>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSignup();
-            }}
-            className="space-y-6"
-          >
-            {/* Username/Email Field */}
+          <form onSubmit={handleSignup} className="space-y-6">
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Full name
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Full name</label>
               <input
                 type="text"
                 placeholder="Enter your full name"
@@ -130,12 +68,8 @@ const Signup = () => {
                 required
               />
             </div>
-
-            {/* Username/Email Field */}
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Username (Email)
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Username (Email)</label>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -146,12 +80,8 @@ const Signup = () => {
                 autoComplete="email"
               />
             </div>
-
-            {/* Password Field */}
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Password
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Password</label>
               <input
                 type="password"
                 placeholder="Enter your password"
@@ -163,9 +93,7 @@ const Signup = () => {
               />
             </div>
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Confirm Password
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Confirm Password</label>
               <input
                 type="password"
                 placeholder="Enter your password again"
@@ -176,11 +104,8 @@ const Signup = () => {
                 autoComplete="new-password"
               />
             </div>
-            {/* Phone Number Field */}
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Phone Number
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Phone Number</label>
               <input
                 type="tel"
                 placeholder="Enter your phone number"
@@ -190,12 +115,8 @@ const Signup = () => {
                 required
               />
             </div>
-
-            {/* Room Number Dropdown */}
             <div>
-              <label className="text-lg text-gray-700 font-semibold">
-                Room Number
-              </label>
+              <label className="text-lg text-gray-700 font-semibold">Room Number</label>
               <select
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
@@ -210,40 +131,34 @@ const Signup = () => {
                 ))}
               </select>
             </div>
-
-            {/* Terms and Signup Button */}
-            <div className="flex items-center justify-between mt-6">
-              <div className="text-sm text-gray-600">
-                By signing up, you agree to our{" "}
-                <a
-                  href="#"
-                  className="text-blue-500 hover:underline"
-                >
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a
-                  href="#"
-                  className="text-blue-500 hover:underline"
-                >
-                  Privacy Policy
-                </a>.
-              </div>
-               {error && <p className="text-red-500 mt-4">{(error as  SignUpErrorResponse).message}</p>}
-                {data && <p className="text-green-500 mt-4">Signup successful!</p>}
-              <button
-                type="submit"
-                className={`bg-blue-500 text-white py-2 px-6 rounded-full shadow-md focus:outline-none ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
-              >
-                {isLoading ? "Signing Up..." : "Sign Up"}
-               
-              </button>
-              
+            <div className="text-sm text-gray-600">
+              By signing up, you agree to our{" "}
+              <a href="#" className="text-blue-500 hover:underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-blue-500 hover:underline">
+                Privacy Policy
+              </a>.
             </div>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-6 rounded-full shadow-md focus:outline-none"
+            >
+              Sign Up
+            </button>
           </form>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <button
+                onClick={() => navigate("/login")}
+                className="text-blue-500 font-semibold hover:underline"
+              >
+                Click here to login
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
